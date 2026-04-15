@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>shadcn/ui — Developer Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════ */
+:root {
+  --background:0 0% 100%;--foreground:240 10% 3.9%;
+  --card:0 0% 100%;--card-foreground:240 10% 3.9%;
+  --popover:0 0% 100%;--popover-foreground:240 10% 3.9%;
+  --primary:240 5.9% 10%;--primary-foreground:0 0% 98%;
+  --secondary:240 4.8% 95.9%;--secondary-foreground:240 5.9% 10%;
+  --muted:240 4.8% 95.9%;--muted-foreground:240 3.8% 46.1%;
+  --accent:240 4.8% 95.9%;--accent-foreground:240 5.9% 10%;
+  --destructive:0 84.2% 60.2%;--destructive-foreground:0 0% 98%;
+  --success:141 78% 42%;--success-foreground:0 0% 98%;
+  --warning:45 93% 47%;--warning-foreground:0 0% 10%;
+  --border:240 5.9% 90%;--input:240 5.9% 90%;--ring:240 5.9% 10%;
+  --radius:0.375rem;
+  --sidebar-w:240px;
+  --code-bg:#0f1117;
+}
+.dark {
+  --background:240 10% 3.9%;--foreground:0 0% 98%;
+  --card:240 10% 3.9%;--card-foreground:0 0% 98%;
+  --popover:240 10% 3.9%;--popover-foreground:0 0% 98%;
+  --primary:0 0% 98%;--primary-foreground:240 5.9% 10%;
+  --secondary:240 3.7% 15.9%;--secondary-foreground:0 0% 98%;
+  --muted:240 3.7% 15.9%;--muted-foreground:240 5% 64.9%;
+  --accent:240 3.7% 15.9%;--accent-foreground:0 0% 98%;
+  --destructive:0 62.8% 30.6%;--destructive-foreground:0 0% 98%;
+  --border:240 3.7% 15.9%;--input:240 3.7% 15.9%;--ring:240 4.9% 83.9%;
+  --code-bg:#0a0a0f;
+}
+
+/* ═══════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',ui-sans-serif,system-ui,sans-serif;
+  background:hsl(var(--background));
+  color:hsl(var(--foreground));
+  display:flex; min-height:100vh;
+  transition:background 200ms,color 200ms;
+  font-size:14px; line-height:1.6;
+}
+
+/* ═══════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════ */
+.sidebar{
+  position:fixed; top:0; left:0;
+  width:var(--sidebar-w); height:100vh;
+  background:hsl(var(--card));
+  border-right:1px solid hsl(var(--border));
+  display:flex; flex-direction:column;
+  overflow-y:auto; z-index:100;
+}
+.sidebar-header{
+  padding:20px 20px 12px;
+  border-bottom:1px solid hsl(var(--border));
+  position:sticky; top:0;
+  background:hsl(var(--card));
+  z-index:1;
+}
+.sidebar-logo{font-size:13px;font-weight:700;color:hsl(var(--foreground))}
+.sidebar-sub{font-size:11px;color:hsl(var(--muted-foreground));margin-top:2px}
+.sidebar-section{padding:12px 12px 4px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--muted-foreground))}
+.sidebar-link{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 12px; border-radius:6px; margin:1px 8px;
+  font-size:13px; font-weight:500;
+  color:hsl(var(--muted-foreground));
+  text-decoration:none; cursor:pointer;
+  transition:background 120ms,color 120ms;
+}
+.sidebar-link:hover{background:hsl(var(--accent));color:hsl(var(--accent-foreground))}
+.sidebar-link.active{background:hsl(var(--primary));color:hsl(var(--primary-foreground))}
+.sidebar-link .badge-count{
+  margin-left:auto; font-size:10px; font-weight:600;
+  background:hsl(var(--muted)); color:hsl(var(--muted-foreground));
+  padding:1px 6px; border-radius:9999px;
+}
+
+/* ═══════════════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════════════ */
+.main{
+  margin-left:var(--sidebar-w);
+  flex:1; padding:0;
+  max-width:100%;
+}
+.topbar{
+  position:sticky; top:0; z-index:50;
+  background:hsl(var(--background) / 0.85);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid hsl(var(--border));
+  padding:12px 40px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.topbar-title{font-size:15px;font-weight:600}
+.topbar-controls{display:flex;align-items:center;gap:12px}
+.theme-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 12px; border-radius:6px;
+  border:1px solid hsl(var(--border));
+  background:transparent; cursor:pointer;
+  font-family:inherit; font-size:12px; font-weight:500;
+  color:hsl(var(--foreground));
+  transition:background 150ms;
+}
+.theme-btn:hover{background:hsl(var(--accent))}
+
+.content{padding:40px;}
+
+/* ═══════════════════════════════════════════════════
+   COMPONENT SECTION
+═══════════════════════════════════════════════════ */
+.comp-section{
+  margin-bottom:72px;
+  scroll-margin-top:64px;
+}
+.comp-header{
+  display:flex; align-items:baseline; gap:12px;
+  margin-bottom:4px;
+}
+.comp-title{font-size:22px;font-weight:700}
+.comp-tag{
+  font-size:11px; font-weight:600; padding:2px 8px;
+  border-radius:9999px; border:1px solid hsl(var(--border));
+  color:hsl(var(--muted-foreground));
+}
+.comp-desc{font-size:14px;color:hsl(var(--muted-foreground));margin-bottom:24px;max-width:580px}
+
+.comp-body{
+  display:grid; gap:24px;
+}
+
+/* Preview pane */
+.preview-pane{
+  background:hsl(var(--card));
+  border:1px solid hsl(var(--border));
+  border-radius:12px; overflow:hidden;
+}
+.preview-label{
+  padding:10px 16px;
+  border-bottom:1px solid hsl(var(--border));
+  font-size:11px; font-weight:600; letter-spacing:.06em;
+  text-transform:uppercase; color:hsl(var(--muted-foreground));
+  display:flex; align-items:center; justify-content:space-between;
+}
+.preview-inner{
+  padding:32px 24px;
+  display:flex; flex-wrap:wrap; align-items:center; gap:12px;
+  min-height:100px;
+}
+.preview-inner.preview-col{flex-direction:column;align-items:flex-start}
+.preview-inner.preview-center{justify-content:center}
+
+/* Code pane */
+.code-pane{
+  border-radius:12px; overflow:hidden;
+  border:1px solid hsl(var(--border));
+}
+.code-header{
+  background:#1a1d27;
+  padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.code-lang{font-size:11px;font-weight:600;color:#6b7280;letter-spacing:.06em;text-transform:uppercase}
+.copy-btn{
+  font-size:11px;font-weight:500;
+  padding:4px 10px;border-radius:5px;
+  background:rgba(255,255,255,0.08);color:#9ca3af;
+  border:1px solid rgba(255,255,255,0.12);
+  cursor:pointer;font-family:inherit;
+  transition:background 150ms,color 150ms;
+}
+.copy-btn:hover{background:rgba(255,255,255,0.15);color:#fff}
+.copy-btn.copied{color:#4ade80}
+pre{
+  background:var(--code-bg);
+  padding:20px;overflow-x:auto;
+  font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:12.5px;line-height:1.7;
+  color:#e2e8f0; margin:0;
+}
+.tk  {color:#f8fafc}  /* token/tag */
+.ky  {color:#93c5fd}  /* keyword/property */
+.st  {color:#86efac}  /* string */
+.cm  {color:#6b7280;font-style:italic} /* comment */
+.vl  {color:#fbbf24}  /* value */
+.cl  {color:#c084fc}  /* class */
+
+/* Dos & Donts */
+.dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dd-card{
+  border-radius:10px;padding:16px 18px;
+}
+.dd-do{background:hsl(141 78% 42% / 0.08);border:1px solid hsl(141 78% 42% / 0.25)}
+.dd-dont{background:hsl(0 84% 60% / 0.07);border:1px solid hsl(0 84% 60% / 0.2)}
+.dd-head{
+  font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:12px;display:flex;align-items:center;gap:6px;
+}
+.dd-do   .dd-head{color:hsl(141 70% 40%)}
+.dd-dont .dd-head{color:hsl(0 72% 51%)}
+.dark .dd-do   .dd-head{color:hsl(141 60% 55%)}
+.dark .dd-dont .dd-head{color:hsl(0 84% 60%)}
+.dd-item{
+  font-size:13px;color:hsl(var(--foreground));
+  padding:6px 0; border-bottom:1px solid hsl(var(--border));
+  display:flex;gap:8px;align-items:flex-start;line-height:1.5;
+}
+.dd-item:last-child{border-bottom:none;padding-bottom:0}
+.dd-item::before{font-size:14px;flex-shrink:0;margin-top:1px}
+.dd-do   .dd-item::before{content:"✓";color:hsl(141 70% 40%);font-weight:700}
+.dark .dd-do .dd-item::before{color:hsl(141 60% 55%)}
+.dd-dont .dd-item::before{content:"✕";color:hsl(0 72% 51%);font-weight:700}
+.dark .dd-dont .dd-item::before{color:hsl(0 84% 60%)}
+
+.section-divider{
+  height:1px;background:hsl(var(--border));
+  margin:72px 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   COMPONENT STYLES (live previews)
+═══════════════════════════════════════════════════ */
+
+/* Button */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:1px solid transparent;border-radius:var(--radius);
+  font-family:inherit;font-size:14px;font-weight:500;line-height:1;
+  white-space:nowrap;cursor:pointer;user-select:none;text-decoration:none;outline:none;
+  transition:background 150ms,color 150ms,border-color 150ms,opacity 150ms,box-shadow 150ms;
+}
+.btn:focus-visible{box-shadow:0 0 0 2px hsl(var(--background)),0 0 0 4px hsl(var(--ring))}
+.btn:disabled{pointer-events:none;opacity:.5}
+.btn-sm{height:36px;padding:0 12px;font-size:13px}
+.btn-md{height:40px;padding:0 16px}
+.btn-lg{height:44px;padding:0 32px;font-size:16px}
+.btn-icon{height:40px;width:40px;padding:0}
+.btn-primary{background:hsl(var(--primary));color:hsl(var(--primary-foreground));border-color:hsl(var(--primary))}
+.btn-primary:hover:not(:disabled){background:hsl(var(--primary)/.88);border-color:hsl(var(--primary)/.88)}
+.btn-destructive{background:hsl(var(--destructive));color:hsl(var(--destructive-foreground))}
+.btn-destructive:hover:not(:disabled){background:hsl(var(--destructive)/.88)}
+.btn-outline{background:hsl(var(--background));color:hsl(var(--foreground));border-color:hsl(var(--border))}
+.btn-outline:hover:not(:disabled){background:hsl(var(--accent));color:hsl(var(--accent-foreground))}
+.btn-secondary{background:hsl(var(--secondary));color:hsl(var(--secondary-foreground));border-color:transparent}
+.btn-secondary:hover:not(:disabled){background:hsl(var(--secondary)/.75)}
+.btn-ghost{background:transparent;color:hsl(var(--foreground));border-color:transparent}
+.btn-ghost:hover:not(:disabled){background:hsl(var(--accent));color:hsl(var(--accent-foreground))}
+.btn-link{background:transparent;color:hsl(var(--foreground));border-color:transparent;text-decoration:underline;text-underline-offset:4px;height:auto;padding:0}
+.btn-link:hover:not(:disabled){opacity:.8}
+.btn svg{width:16px;height:16px;flex-shrink:0}
+
+/* Badge */
+.badge{
+  display:inline-flex;align-items:center;
+  border-radius:9999px;padding:2px 10px;
+  font-size:12px;font-weight:600;border:1px solid transparent;
+  white-space:nowrap;
+}
+.badge-default{background:hsl(var(--primary));color:hsl(var(--primary-foreground))}
+.badge-secondary{background:hsl(var(--secondary));color:hsl(var(--secondary-foreground))}
+.badge-destructive{background:hsl(var(--destructive));color:hsl(var(--destructive-foreground))}
+.badge-outline{background:transparent;color:hsl(var(--foreground));border-color:hsl(var(--border))}
+.badge-success{background:hsl(var(--success));color:hsl(var(--success-foreground))}
+.badge-warning{background:hsl(var(--warning));color:hsl(var(--warning-foreground))}
+
+/* Input */
+.input{
+  display:flex;height:40px;width:100%;max-width:320px;
+  border-radius:var(--radius);border:1px solid hsl(var(--input));
+  background:hsl(var(--background));color:hsl(var(--foreground));
+  padding:0 12px;font-family:inherit;font-size:14px;outline:none;
+  transition:border-color 150ms,box-shadow 150ms;
+}
+.input::placeholder{color:hsl(var(--muted-foreground))}
+.input:focus{border-color:hsl(var(--ring));box-shadow:0 0 0 2px hsl(var(--background)),0 0 0 4px hsl(var(--ring)/.35)}
+.input:disabled{opacity:.5;cursor:not-allowed}
+.input.input-error{border-color:hsl(var(--destructive))}
+
+/* Label */
+.label{font-size:14px;font-weight:500;color:hsl(var(--foreground));display:block;margin-bottom:6px}
+
+/* Textarea */
+.textarea{
+  width:100%;max-width:320px;min-height:80px;
+  border-radius:var(--radius);border:1px solid hsl(var(--input));
+  background:hsl(var(--background));color:hsl(var(--foreground));
+  padding:8px 12px;font-family:inherit;font-size:14px;outline:none;resize:vertical;
+  transition:border-color 150ms,box-shadow 150ms;
+}
+.textarea:focus{border-color:hsl(var(--ring));box-shadow:0 0 0 2px hsl(var(--background)),0 0 0 4px hsl(var(--ring)/.35)}
+
+/* Checkbox */
+.checkbox-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.checkbox{
+  width:16px;height:16px;border-radius:3px;flex-shrink:0;cursor:pointer;
+  border:1.5px solid hsl(var(--primary));background:hsl(var(--background));
+  appearance:none;-webkit-appearance:none;
+  transition:background 150ms,border-color 150ms;position:relative;
+}
+.checkbox:checked{background:hsl(var(--primary));border-color:hsl(var(--primary))}
+.checkbox:checked::after{
+  content:'';position:absolute;left:4px;top:1px;
+  width:5px;height:9px;border:2px solid hsl(var(--primary-foreground));
+  border-left:none;border-top:none;transform:rotate(45deg);
+}
+.checkbox:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+.checkbox:disabled{opacity:.5;cursor:not-allowed}
+
+/* Switch */
+.switch-wrap{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.switch{
+  position:relative;width:44px;height:24px;flex-shrink:0;
+  appearance:none;-webkit-appearance:none;cursor:pointer;
+  border-radius:9999px;background:hsl(var(--muted));
+  border:none;transition:background 200ms;outline:none;
+}
+.switch:checked{background:hsl(var(--primary))}
+.switch::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:18px;height:18px;border-radius:9999px;
+  background:hsl(var(--background));
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+  transition:transform 200ms;
+}
+.switch:checked::after{transform:translateX(20px)}
+.switch:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+
+/* Select */
+.select{
+  height:40px;padding:0 32px 0 12px;
+  border-radius:var(--radius);border:1px solid hsl(var(--input));
+  background:hsl(var(--background));color:hsl(var(--foreground));
+  font-family:inherit;font-size:14px;outline:none;cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24' stroke='%2371717a' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m19 9-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+  transition:border-color 150ms,box-shadow 150ms;
+}
+.select:focus{border-color:hsl(var(--ring));box-shadow:0 0 0 2px hsl(var(--background)),0 0 0 4px hsl(var(--ring)/.35)}
+
+/* Card */
+.card{
+  border-radius:calc(var(--radius)*2);border:1px solid hsl(var(--border));
+  background:hsl(var(--card));color:hsl(var(--card-foreground));
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+.card-header{padding:20px 20px 12px}
+.card-title{font-size:18px;font-weight:600;margin-bottom:4px}
+.card-desc{font-size:13px;color:hsl(var(--muted-foreground))}
+.card-content{padding:0 20px 16px}
+.card-footer{padding:12px 20px 20px;border-top:1px solid hsl(var(--border));display:flex;gap:8px}
+
+/* Avatar */
+.avatar{
+  border-radius:9999px;background:hsl(var(--muted));
+  display:inline-flex;align-items:center;justify-content:center;
+  font-weight:600;color:hsl(var(--muted-foreground));flex-shrink:0;overflow:hidden;
+}
+.avatar-sm{width:32px;height:32px;font-size:12px}
+.avatar-md{width:40px;height:40px;font-size:14px}
+.avatar-lg{width:48px;height:48px;font-size:18px}
+.avatar-xl{width:64px;height:64px;font-size:22px}
+.avatar img{width:100%;height:100%;object-fit:cover}
+
+/* Separator */
+.separator-h{height:1px;background:hsl(var(--border));width:100%}
+.separator-v{width:1px;background:hsl(var(--border));height:40px;flex-shrink:0}
+
+/* Alert */
+.alert{
+  border-radius:calc(var(--radius)*2);border:1px solid;
+  padding:14px 16px;display:flex;gap:12px;
+}
+.alert-default{background:hsl(var(--background));border-color:hsl(var(--border));color:hsl(var(--foreground))}
+.alert-destructive{background:hsl(var(--background));border-color:hsl(var(--destructive));color:hsl(var(--destructive))}
+.alert-success{background:hsl(var(--success)/.1);border-color:hsl(var(--success)/.4);color:hsl(var(--foreground))}
+.alert-warning{background:hsl(var(--warning)/.1);border-color:hsl(var(--warning)/.4);color:hsl(var(--foreground))}
+.alert-icon{font-size:18px;flex-shrink:0;line-height:1.4}
+.alert-body{}
+.alert-title{font-weight:600;font-size:14px;margin-bottom:3px}
+.alert-desc{font-size:13px;opacity:.9}
+.alert-destructive .alert-title{color:hsl(var(--destructive))}
+
+/* Progress */
+.progress-wrap{width:100%;max-width:320px}
+.progress-track{
+  height:8px;width:100%;border-radius:9999px;
+  background:hsl(var(--secondary));overflow:hidden;
+}
+.progress-fill{height:100%;border-radius:9999px;background:hsl(var(--primary));transition:width 400ms}
+
+/* Skeleton */
+.skeleton{
+  border-radius:var(--radius);background:hsl(var(--muted));
+  animation:pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Tabs */
+.tabs-list{
+  display:inline-flex;background:hsl(var(--muted));
+  border-radius:var(--radius);padding:4px;gap:2px;
+}
+.tab-trigger{
+  padding:6px 14px;border-radius:calc(var(--radius) - 2px);
+  font-size:13px;font-weight:500;cursor:pointer;
+  border:none;background:transparent;
+  color:hsl(var(--muted-foreground));font-family:inherit;
+  transition:background 150ms,color 150ms;
+}
+.tab-trigger.active{background:hsl(var(--background));color:hsl(var(--foreground));box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.tab-trigger:hover:not(.active){color:hsl(var(--foreground))}
+.tab-content{padding:16px 0;font-size:14px;color:hsl(var(--muted-foreground))}
+
+/* Tooltip */
+.tooltip-wrap{position:relative;display:inline-flex}
+.tooltip-trigger{display:inline-flex}
+.tooltip-bubble{
+  position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:hsl(var(--foreground));color:hsl(var(--background));
+  padding:5px 10px;border-radius:5px;font-size:12px;font-weight:500;
+  white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 150ms;
+  box-shadow:0 4px 8px rgba(0,0,0,.12);
+}
+.tooltip-bubble::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:hsl(var(--foreground));
+}
+.tooltip-wrap:hover .tooltip-bubble{opacity:1}
+
+/* Breadcrumb */
+.breadcrumb{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:14px}
+.breadcrumb-item{color:hsl(var(--muted-foreground));text-decoration:none;transition:color 150ms}
+.breadcrumb-item:hover{color:hsl(var(--foreground))}
+.breadcrumb-item.current{color:hsl(var(--foreground));font-weight:500;pointer-events:none}
+.breadcrumb-sep{color:hsl(var(--muted-foreground));user-select:none}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;gap:4px}
+.page-btn{
+  width:36px;height:36px;border-radius:var(--radius);
+  border:1px solid hsl(var(--border));background:hsl(var(--background));
+  color:hsl(var(--foreground));cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background 150ms,color 150ms;
+}
+.page-btn:hover:not(.active):not(:disabled){background:hsl(var(--accent))}
+.page-btn.active{background:hsl(var(--primary));color:hsl(var(--primary-foreground));border-color:hsl(var(--primary))}
+.page-btn:disabled{opacity:.5;pointer-events:none}
+
+/* Dialog (non-modal demo) */
+.dialog-demo{
+  border-radius:calc(var(--radius)*2);border:1px solid hsl(var(--border));
+  background:hsl(var(--background));box-shadow:0 20px 40px rgba(0,0,0,.12);
+  width:100%;max-width:380px;overflow:hidden;
+}
+.dialog-header{padding:20px 20px 12px;border-bottom:1px solid hsl(var(--border))}
+.dialog-title{font-size:16px;font-weight:600;margin-bottom:4px}
+.dialog-desc{font-size:13px;color:hsl(var(--muted-foreground))}
+.dialog-body{padding:16px 20px}
+.dialog-footer{padding:12px 20px 20px;display:flex;justify-content:flex-end;gap:8px}
+
+/* Dropdown */
+.dropdown-demo{
+  border-radius:calc(var(--radius)*2);border:1px solid hsl(var(--border));
+  background:hsl(var(--popover));color:hsl(var(--popover-foreground));
+  box-shadow:0 8px 24px rgba(0,0,0,.1);min-width:180px;padding:4px;
+}
+.dropdown-item{
+  padding:7px 10px;border-radius:var(--radius);font-size:13px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;transition:background 100ms;
+}
+.dropdown-item:hover{background:hsl(var(--accent))}
+.dropdown-item.destructive:hover{background:hsl(var(--destructive));color:hsl(var(--destructive-foreground))}
+.dropdown-sep{height:1px;background:hsl(var(--border));margin:4px 0}
+.dropdown-shortcut{font-size:11px;color:hsl(var(--muted-foreground))}
+
+/* Form field */
+.form-field{display:grid;gap:6px;width:100%;max-width:320px}
+.helper-text{font-size:12px;color:hsl(var(--muted-foreground))}
+.error-text{font-size:12px;color:hsl(var(--destructive))}
+
+/* Prop table */
+.prop-table{
+  width:100%;border-collapse:collapse;font-size:13px;
+  border:1px solid hsl(var(--border));border-radius:10px;overflow:hidden;
+}
+.prop-table th{
+  text-align:left;padding:10px 14px;
+  background:hsl(var(--muted));color:hsl(var(--muted-foreground));
+  font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border-bottom:1px solid hsl(var(--border));
+}
+.prop-table td{
+  padding:10px 14px;border-bottom:1px solid hsl(var(--border));
+  vertical-align:top;
+}
+.prop-table tr:last-child td{border-bottom:none}
+.prop-table code{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:hsl(var(--muted));padding:2px 6px;border-radius:4px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">shadcn/ui</div>
+    <div class="sidebar-sub">Developer Reference · v1.0</div>
+  </div>
+
+  <div style="padding:8px 0 16px">
+    <div class="sidebar-section">Form Controls</div>
+    <a class="sidebar-link active" href="#button">Button <span class="badge-count">6v</span></a>
+    <a class="sidebar-link" href="#input">Input <span class="badge-count">5s</span></a>
+    <a class="sidebar-link" href="#checkbox">Checkbox</a>
+    <a class="sidebar-link" href="#switch">Switch</a>
+    <a class="sidebar-link" href="#select">Select</a>
+    <a class="sidebar-link" href="#label">Label</a>
+    <a class="sidebar-link" href="#formfield">Form Field</a>
+
+    <div class="sidebar-section">Display</div>
+    <a class="sidebar-link" href="#badge">Badge <span class="badge-count">4v</span></a>
+    <a class="sidebar-link" href="#card">Card</a>
+    <a class="sidebar-link" href="#avatar">Avatar</a>
+    <a class="sidebar-link" href="#separator">Separator</a>
+    <a class="sidebar-link" href="#skeleton">Skeleton</a>
+    <a class="sidebar-link" href="#progress">Progress</a>
+
+    <div class="sidebar-section">Feedback</div>
+    <a class="sidebar-link" href="#alert">Alert <span class="badge-count">4v</span></a>
+    <a class="sidebar-link" href="#tooltip">Tooltip</a>
+
+    <div class="sidebar-section">Overlays</div>
+    <a class="sidebar-link" href="#dialog">Dialog</a>
+    <a class="sidebar-link" href="#dropdown">Dropdown</a>
+
+    <div class="sidebar-section">Navigation</div>
+    <a class="sidebar-link" href="#tabs">Tabs</a>
+    <a class="sidebar-link" href="#breadcrumb">Breadcrumb</a>
+    <a class="sidebar-link" href="#pagination">Pagination</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     TOPBAR
+════════════════════════════════════════════════ -->
+<div class="main">
+<div class="topbar">
+  <span class="topbar-title">Component Reference</span>
+  <div class="topbar-controls">
+    <button class="theme-btn" onclick="toggleTheme(this)">🌙 Dark mode</button>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ══════════════════════════════════════════════════════════════
+     BUTTON
+══════════════════════════════════════════════════════════════ -->
+<section class="comp-section" id="button">
+  <div class="comp-header">
+    <h2 class="comp-title">Button</h2>
+    <span class="comp-tag">Interactive</span>
+  </div>
+  <p class="comp-desc">Triggers an action or navigates. Use variant to communicate intent and size to establish hierarchy.</p>
+
+  <div class="comp-body">
+    <!-- Variants preview -->
+    <div class="preview-pane">
+      <div class="preview-label">Variants</div>
+      <div class="preview-inner">
+        <button class="btn btn-md btn-primary">Default</button>
+        <button class="btn btn-md btn-destructive">Destructive</button>
+        <button class="btn btn-md btn-outline">Outline</button>
+        <button class="btn btn-md btn-secondary">Secondary</button>
+        <button class="btn btn-md btn-ghost">Ghost</button>
+        <button class="btn btn-link">Link</button>
+      </div>
+      <div class="preview-label" style="border-top:1px solid hsl(var(--border))">Sizes &amp; States</div>
+      <div class="preview-inner">
+        <button class="btn btn-sm btn-primary">Small</button>
+        <button class="btn btn-md btn-primary">Default</button>
+        <button class="btn btn-lg btn-primary">Large</button>
+        <button class="btn btn-md btn-primary" disabled>Disabled</button>
+      </div>
+    </div>
+
+    <!-- Code -->
+    <div class="code-pane">
+      <div class="code-header">
+        <span class="code-lang">HTML + CSS</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+<pre><span class="cm">&lt;!-- Variant: Default --&gt;</span>
+<span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"btn btn-md btn-primary"</span><span class="tk">&gt;</span>Save changes<span class="tk">&lt;/button&gt;</span>
+
+<span class="cm">&lt;!-- Variant: Destructive --&gt;</span>
+<span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"btn btn-md btn-destructive"</span><span class="tk">&gt;</span>Delete<span class="tk">&lt;/button&gt;</span>
+
+<span class="cm">&lt;!-- Variant: Outline --&gt;</span>
+<span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"btn btn-md btn-outline"</span><span class="tk">&gt;</span>Cancel<span class="tk">&lt;/button&gt;</span>
+
+<span class="cm">&lt;!-- Disabled --&gt;</span>
+<span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"btn btn-md btn-primary"</span> <span class="ky">disabled</span><span class="tk">&gt;</span>Saving…<span class="tk">&lt;/button&gt;</span>
+
+<span class="cm">/* CSS tokens used */</span>
+<span class="cl">.btn-primary</span> {
+  <span class="ky">background-color</span>: <span class="vl">hsl(var(--primary))</span>;
+  <span class="ky">color</span>:            <span class="vl">hsl(var(--primary-foreground))</span>;
+}
+<span class="cl">.btn-primary:hover</span> {
+  <span class="ky">background-color</span>: <span class="vl">hsl(var(--primary) / 0.88)</span>;
+}</pre>
+    </div>
+
+    <!-- Props -->
+    <table class="prop-table">
+      <thead><tr><th>Prop / Class</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>btn-primary</code></td><td>variant</td><td>—</td><td>Uses <code>--primary</code> background</td></tr>
+        <tr><td><code>btn-destructive</code></td><td>variant</td><td>—</td><td>Uses <code>--destructive</code> for danger actions</td></tr>
+        <tr><td><code>btn-outline</code></td><td>variant</td><td>—</td><td>Bordered, uses <code>--border</code></td></tr>
+        <tr><td><code>btn-secondary</code></td><td>variant</td><td>—</td><td>Subdued with <code>--secondary</code></td></tr>
+        <tr><td><code>btn-ghost</code></td><td>variant</td><td>—</td><td>Transparent, hover shows <code>--accent</code></td></tr>
+        <tr><td><code>btn-sm / btn-md / btn-lg</code></td><td>size</td><td>btn-md</td><td>36px / 40px / 44px height</td></tr>
+        <tr><td><code>disabled</code></td><td>HTML attr</td><td>false</td><td>Applies 50% opacity, blocks interaction</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Do's & Don'ts -->
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Use <strong>Default</strong> for the primary CTA per screen — one per view.</div>
+        <div class="dd-item">Use <strong>Outline</strong> or <strong>Ghost</strong> for secondary/cancel actions alongside a primary.</div>
+        <div class="dd-item">Use <strong>Destructive</strong> only for irreversible actions (delete, remove, revoke).</div>
+        <div class="dd-item">Always add <code>disabled</code> during async operations to prevent double-submit.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't place two <strong>Default</strong> buttons side-by-side — creates visual ambiguity.</div>
+        <div class="dd-item">Don't use <strong>Destructive</strong> for routine actions like "clear filters" or "reset form".</div>
+        <div class="dd-item">Don't hard-code colours — always use <code>--primary</code>, <code>--destructive</code> tokens.</div>
+        <div class="dd-item">Don't use <strong>Link</strong> variant for navigation — use an <code>&lt;a&gt;</code> element instead.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     BADGE
+══════════════════════════════════════════════════════════════ -->
+<section class="comp-section" id="badge">
+  <div class="comp-header"><h2 class="comp-title">Badge</h2><span class="comp-tag">Display</span></div>
+  <p class="comp-desc">Small label for status, category, or count. Never interactive on its own.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-label">Variants</div>
+      <div class="preview-inner">
+        <span class="badge badge-default">Default</span>
+        <span class="badge badge-secondary">Secondary</span>
+        <span class="badge badge-destructive">Destructive</span>
+        <span class="badge badge-outline">Outline</span>
+        <span class="badge badge-success">Success</span>
+        <span class="badge badge-warning">Warning</span>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"badge badge-default"</span><span class="tk">&gt;</span>New<span class="tk">&lt;/span&gt;</span>
+<span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"badge badge-secondary"</span><span class="tk">&gt;</span>Draft<span class="tk">&lt;/span&gt;</span>
+<span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"badge badge-destructive"</span><span class="tk">&gt;</span>Error<span class="tk">&lt;/span&gt;</span>
+<span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"badge badge-success"</span><span class="tk">&gt;</span>Published<span class="tk">&lt;/span&gt;</span>
+<span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"badge badge-outline"</span><span class="tk">&gt;</span>Beta<span class="tk">&lt;/span&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Use <strong>Destructive</strong> for error/critical states, <strong>Success</strong> for live/active states.</div>
+        <div class="dd-item">Keep badge text under 3 words — it's a label, not a sentence.</div>
+        <div class="dd-item">Use <strong>Outline</strong> when the badge sits on a coloured background to avoid clashing fills.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't make badges clickable without adding button semantics and a hover state.</div>
+        <div class="dd-item">Don't use multiple filled-colour badges in the same row — it creates noise.</div>
+        <div class="dd-item">Don't use badge for numeric counts > 99; show "99+" instead.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     INPUT
+══════════════════════════════════════════════════════════════ -->
+<section class="comp-section" id="input">
+  <div class="comp-header"><h2 class="comp-title">Input</h2><span class="comp-tag">Form</span></div>
+  <p class="comp-desc">Single-line text entry. Always pair with a Label and optional helper/error text.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-label">States</div>
+      <div class="preview-inner preview-col" style="gap:14px">
+        <input class="input" placeholder="Default — placeholder text" />
+        <input class="input" value="Filled — hello@example.com" />
+        <input class="input" placeholder="Error state" style="border-color:hsl(var(--destructive))" />
+        <input class="input" placeholder="Disabled" disabled />
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="cm">&lt;!-- Default --&gt;</span>
+<span class="tk">&lt;input</span> <span class="ky">class</span>=<span class="st">"input"</span> <span class="ky">type</span>=<span class="st">"email"</span> <span class="ky">placeholder</span>=<span class="st">"Email"</span> <span class="tk">/&gt;</span>
+
+<span class="cm">&lt;!-- Error state --&gt;</span>
+<span class="tk">&lt;input</span> <span class="ky">class</span>=<span class="st">"input input-error"</span> <span class="ky">aria-invalid</span>=<span class="st">"true"</span> <span class="tk">/&gt;</span>
+
+<span class="cm">&lt;!-- Disabled --&gt;</span>
+<span class="tk">&lt;input</span> <span class="ky">class</span>=<span class="st">"input"</span> <span class="ky">disabled</span> <span class="tk">/&gt;</span>
+
+<span class="cm">/* Error modifier */</span>
+<span class="cl">.input-error</span> { <span class="ky">border-color</span>: <span class="vl">hsl(var(--destructive))</span>; }</pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Always associate a <code>&lt;label&gt;</code> using <code>for</code>/<code>id</code> — never rely on placeholder alone.</div>
+        <div class="dd-item">Add <code>aria-invalid="true"</code> and <code>aria-describedby</code> pointing to error text on error state.</div>
+        <div class="dd-item">Use <code>type="email"</code>, <code>type="password"</code>, <code>type="number"</code> for semantic correctness.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't use placeholder text as the only label — it disappears on input.</div>
+        <div class="dd-item">Don't show an error state before the user has interacted (blur or submit first).</div>
+        <div class="dd-item">Don't nest inputs inside labels without explicit <code>for/id</code> — screen readers behave inconsistently.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     CHECKBOX
+══════════════════════════════════════════════════════════════ -->
+<section class="comp-section" id="checkbox">
+  <div class="comp-header"><h2 class="comp-title">Checkbox</h2><span class="comp-tag">Form</span></div>
+  <p class="comp-desc">Binary toggle for independent options. Use for multi-select lists.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-label">States</div>
+      <div class="preview-inner preview-col" style="gap:14px">
+        <label class="checkbox-wrap"><input type="checkbox" class="checkbox" /> Unchecked</label>
+        <label class="checkbox-wrap"><input type="checkbox" class="checkbox" checked /> Checked</label>
+        <label class="checkbox-wrap"><input type="checkbox" class="checkbox" disabled /> Disabled</label>
+        <label class="checkbox-wrap"><input type="checkbox" class="checkbox" checked disabled /> Checked &amp; Disabled</label>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;label</span> <span class="ky">class</span>=<span class="st">"checkbox-wrap"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;input</span> <span class="ky">type</span>=<span class="st">"checkbox"</span> <span class="ky">class</span>=<span class="st">"checkbox"</span> <span class="ky">id</span>=<span class="st">"terms"</span> <span class="tk">/&gt;</span>
+  Accept terms and conditions
+<span class="tk">&lt;/label&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Wrap in a <code>&lt;label&gt;</code> so clicking the text also toggles the checkbox.</div>
+        <div class="dd-item">Use for independent boolean options (e.g. "Send me updates").</div>
+        <div class="dd-item">Use a checkbox group for multi-select; use radio for single-select-from-many.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't use a checkbox in place of a Toggle/Switch for live settings that apply immediately.</div>
+        <div class="dd-item">Don't style away the focus ring — keyboard users rely on it.</div>
+        <div class="dd-item">Don't pre-check consent or agreement checkboxes — explicit opt-in required by GDPR.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SWITCH
+══════════════════════════════════════════════════════════════ -->
+<section class="comp-section" id="switch">
+  <div class="comp-header"><h2 class="comp-title">Switch</h2><span class="comp-tag">Form</span></div>
+  <p class="comp-desc">Immediate on/off toggle. Use when the change takes effect instantly without a save step.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-label">States</div>
+      <div class="preview-inner preview-col" style="gap:14px">
+        <label class="switch-wrap"><input type="checkbox" class="switch" /> Off</label>
+        <label class="switch-wrap"><input type="checkbox" class="switch" checked /> On</label>
+        <label class="switch-wrap"><input type="checkbox" class="switch" disabled /> Disabled</label>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;label</span> <span class="ky">class</span>=<span class="st">"switch-wrap"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;input</span> <span class="ky">type</span>=<span class="st">"checkbox"</span> <span class="ky">class</span>=<span class="st">"switch"</span> <span class="ky">role</span>=<span class="st">"switch"</span> <span class="tk">/&gt;</span>
+  Dark mode
+<span class="tk">&lt;/label&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Add <code>role="switch"</code> and <code>aria-checked</code> for screen reader clarity.</div>
+        <div class="dd-item">Apply changes immediately — Switch implies instant effect, unlike Checkbox in a form.</div>
+        <div class="dd-item">Always label the switch with what it enables (e.g. "Email notifications").</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't require a save button after toggling — that's what a Checkbox is for.</div>
+        <div class="dd-item">Don't use Switch for filtering or selection; use Checkbox for that.</div>
+        <div class="dd-item">Don't label the switch "On/Off" — describe what will be enabled.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- SELECT -->
+<section class="comp-section" id="select">
+  <div class="comp-header"><h2 class="comp-title">Select</h2><span class="comp-tag">Form</span></div>
+  <p class="comp-desc">Choose one option from a dropdown list.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-label">Default</div>
+      <div class="preview-inner preview-col" style="gap:14px">
+        <select class="select" style="width:240px">
+          <option value="">Select a framework…</option>
+          <option>React</option><option>Vue</option><option>Svelte</option>
+        </select>
+        <select class="select" style="width:240px" disabled>
+          <option>Disabled</option>
+        </select>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;label</span> <span class="ky">for</span>=<span class="st">"framework"</span><span class="tk">&gt;</span>Framework<span class="tk">&lt;/label&gt;</span>
+<span class="tk">&lt;select</span> <span class="ky">class</span>=<span class="st">"select"</span> <span class="ky">id</span>=<span class="st">"framework"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;option</span> <span class="ky">value</span>=<span class="st">""</span><span class="tk">&gt;</span>Select…<span class="tk">&lt;/option&gt;</span>
+  <span class="tk">&lt;option&gt;</span>React<span class="tk">&lt;/option&gt;</span>
+  <span class="tk">&lt;option&gt;</span>Vue<span class="tk">&lt;/option&gt;</span>
+<span class="tk">&lt;/select&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Use Select for 5+ options. For 2–4, consider radio buttons for visibility.</div>
+        <div class="dd-item">Include a blank/placeholder option (e.g. "Select a country…") when no default is valid.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't use Select for boolean choices — use a Switch or Checkbox.</div>
+        <div class="dd-item">Don't mix disabled and enabled options without explaining why options are unavailable.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- LABEL + FORM FIELD -->
+<section class="comp-section" id="label">
+  <div class="comp-header"><h2 class="comp-title">Label</h2><span class="comp-tag">Form</span></div>
+  <p class="comp-desc">Accessible caption for form controls. Always linked via <code>for</code>/<code>id</code>.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner preview-col" style="gap:4px">
+        <label class="label" for="demo-email">Email address <span style="color:hsl(var(--destructive))">*</span></label>
+        <input class="input" id="demo-email" type="email" placeholder="you@example.com" />
+        <span class="helper-text">We'll send a confirmation link.</span>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;label</span> <span class="ky">class</span>=<span class="st">"label"</span> <span class="ky">for</span>=<span class="st">"email"</span><span class="tk">&gt;</span>
+  Email <span class="tk">&lt;span</span> <span class="ky">aria-hidden</span>=<span class="st">"true"</span><span class="tk">&gt;</span>*<span class="tk">&lt;/span&gt;</span>
+<span class="tk">&lt;/label&gt;</span>
+<span class="tk">&lt;input</span> <span class="ky">class</span>=<span class="st">"input"</span> <span class="ky">id</span>=<span class="st">"email"</span> <span class="ky">type</span>=<span class="st">"email"</span> <span class="ky">required</span> <span class="tk">/&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Mark required fields with <code>aria-required="true"</code> and a visible indicator.</div>
+        <div class="dd-item">Place the label above the input, not beside it — easier to scan on mobile.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't use placeholder text as the label — it disappears and fails accessibility audits.</div>
+        <div class="dd-item">Don't make labels all-caps — they become harder to read at small sizes.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- FORM FIELD -->
+<section class="comp-section" id="formfield">
+  <div class="comp-header"><h2 class="comp-title">Form Field</h2><span class="comp-tag">Composite</span></div>
+  <p class="comp-desc">Compound of Label + Input + Helper/Error text. The building block for every form.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-label">Valid vs Error</div>
+      <div class="preview-inner" style="gap:24px;align-items:flex-start">
+        <div class="form-field">
+          <label class="label" for="ff1">Username</label>
+          <input class="input" id="ff1" value="arun_kumar" />
+          <span class="helper-text">Must be unique across the platform.</span>
+        </div>
+        <div class="form-field">
+          <label class="label" for="ff2">Email</label>
+          <input class="input input-error" id="ff2" value="not-an-email" aria-invalid="true" aria-describedby="ff2-err" />
+          <span class="error-text" id="ff2-err">Enter a valid email address.</span>
+        </div>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="cm">&lt;!-- Error state --&gt;</span>
+<span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"form-field"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;label</span> <span class="ky">class</span>=<span class="st">"label"</span> <span class="ky">for</span>=<span class="st">"email"</span><span class="tk">&gt;</span>Email<span class="tk">&lt;/label&gt;</span>
+  <span class="tk">&lt;input</span> <span class="ky">class</span>=<span class="st">"input input-error"</span> <span class="ky">id</span>=<span class="st">"email"</span>
+    <span class="ky">aria-invalid</span>=<span class="st">"true"</span>
+    <span class="ky">aria-describedby</span>=<span class="st">"email-err"</span> <span class="tk">/&gt;</span>
+  <span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"error-text"</span> <span class="ky">id</span>=<span class="st">"email-err"</span><span class="tk">&gt;</span>
+    Enter a valid email.
+  <span class="tk">&lt;/span&gt;</span>
+<span class="tk">&lt;/div&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Always use <code>aria-describedby</code> pointing to the error/helper text id.</div>
+        <div class="dd-item">Show error messages below the field (not in a toast) so they're spatially linked.</div>
+        <div class="dd-item">Validate on blur, not on keypress — don't interrupt users while typing.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't show all form errors in a single banner at the top — users lose context of which field failed.</div>
+        <div class="dd-item">Don't remove the error message until the user has corrected the value and re-blurred.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- CARD -->
+<section class="comp-section" id="card">
+  <div class="comp-header"><h2 class="comp-title">Card</h2><span class="comp-tag">Display</span></div>
+  <p class="comp-desc">Surface for grouping related content. Composed of Header, Content, and Footer slots.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner preview-center">
+        <div class="card" style="width:100%;max-width:360px">
+          <div class="card-header">
+            <div class="card-title">Account Settings</div>
+            <div class="card-desc">Update your profile information and preferences.</div>
+          </div>
+          <div class="card-content">
+            <div class="form-field">
+              <label class="label" for="card-name">Display name</label>
+              <input class="input" id="card-name" value="Arun Kumar" style="max-width:100%" />
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-sm btn-primary">Save changes</button>
+            <button class="btn btn-sm btn-outline">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"card"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"card-header"</span><span class="tk">&gt;</span>
+    <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"card-title"</span><span class="tk">&gt;</span>Title<span class="tk">&lt;/div&gt;</span>
+    <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"card-desc"</span><span class="tk">&gt;</span>Description<span class="tk">&lt;/div&gt;</span>
+  <span class="tk">&lt;/div&gt;</span>
+  <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"card-content"</span><span class="tk">&gt;</span> … <span class="tk">&lt;/div&gt;</span>
+  <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"card-footer"</span><span class="tk">&gt;</span>
+    <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"btn btn-sm btn-primary"</span><span class="tk">&gt;</span>Save<span class="tk">&lt;/button&gt;</span>
+  <span class="tk">&lt;/div&gt;</span>
+<span class="tk">&lt;/div&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Use Card to visually group related information that belongs together logically.</div>
+        <div class="dd-item">Place primary actions in <code>card-footer</code> to establish a consistent reading flow.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't nest cards inside cards — it creates ambiguous visual hierarchy.</div>
+        <div class="dd-item">Don't put unrelated content in the same card to "save space" — each card = one concern.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- AVATAR -->
+<section class="comp-section" id="avatar">
+  <div class="comp-header"><h2 class="comp-title">Avatar</h2><span class="comp-tag">Display</span></div>
+  <p class="comp-desc">Represents a user with an image or fallback initials.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner">
+        <div class="avatar avatar-sm">AK</div>
+        <div class="avatar avatar-md">JD</div>
+        <div class="avatar avatar-lg" style="background:hsl(217 91% 60%);color:#fff">RK</div>
+        <div class="avatar avatar-xl" style="background:hsl(280 65% 55%);color:#fff">MJ</div>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="cm">&lt;!-- Initials fallback --&gt;</span>
+<span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"avatar avatar-md"</span> <span class="ky">role</span>=<span class="st">"img"</span> <span class="ky">aria-label</span>=<span class="st">"Arun Kumar"</span><span class="tk">&gt;</span>
+  AK
+<span class="tk">&lt;/div&gt;</span>
+
+<span class="cm">&lt;!-- With image --&gt;</span>
+<span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"avatar avatar-md"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;img</span> <span class="ky">src</span>=<span class="st">"photo.jpg"</span> <span class="ky">alt</span>=<span class="st">"Arun Kumar"</span> <span class="tk">/&gt;</span>
+<span class="tk">&lt;/div&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Always have a fallback — show initials when the image fails to load.</div>
+        <div class="dd-item">Add <code>aria-label</code> with the user's name for accessibility.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't use generic icons as fallbacks — initials are more identifiable.</div>
+        <div class="dd-item">Don't use avatars larger than <code>avatar-xl</code> in lists — they dominate layout.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ALERT -->
+<section class="comp-section" id="alert">
+  <div class="comp-header"><h2 class="comp-title">Alert</h2><span class="comp-tag">Feedback</span></div>
+  <p class="comp-desc">Inline callout for important contextual messages. Not dismissible by default.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner preview-col" style="gap:12px">
+        <div class="alert alert-default" style="width:100%;max-width:480px">
+          <span class="alert-icon">ℹ️</span>
+          <div class="alert-body"><div class="alert-title">Heads up</div><div class="alert-desc">You can add components to your app using the CLI.</div></div>
+        </div>
+        <div class="alert alert-destructive" style="width:100%;max-width:480px">
+          <span class="alert-icon">⚠️</span>
+          <div class="alert-body"><div class="alert-title">Error</div><div class="alert-desc">Your session has expired. Please sign in again.</div></div>
+        </div>
+        <div class="alert alert-success" style="width:100%;max-width:480px">
+          <span class="alert-icon">✅</span>
+          <div class="alert-body"><div class="alert-title">Success</div><div class="alert-desc">Your changes have been saved successfully.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"alert alert-destructive"</span> <span class="ky">role</span>=<span class="st">"alert"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"alert-icon"</span><span class="tk">&gt;</span>⚠️<span class="tk">&lt;/span&gt;</span>
+  <span class="tk">&lt;div&gt;</span>
+    <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"alert-title"</span><span class="tk">&gt;</span>Error<span class="tk">&lt;/div&gt;</span>
+    <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"alert-desc"</span><span class="tk">&gt;</span>Session expired.<span class="tk">&lt;/div&gt;</span>
+  <span class="tk">&lt;/div&gt;</span>
+<span class="tk">&lt;/div&gt;</span>
+
+<span class="cm">/* Tokens: --destructive, --border, --background */</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Add <code>role="alert"</code> so screen readers announce the message immediately.</div>
+        <div class="dd-item">Use for in-context messages related to the current form or view — not for global notifications.</div>
+        <div class="dd-item">Keep title short (3–5 words) and put detail in the description.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't use Alert for transient notifications — use Toast instead.</div>
+        <div class="dd-item">Don't stack multiple alerts — consolidate into one or use a list inside the description.</div>
+        <div class="dd-item">Don't use Destructive for warnings — reserve it for errors only.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- SEPARATOR -->
+<section class="comp-section" id="separator">
+  <div class="comp-header"><h2 class="comp-title">Separator</h2><span class="comp-tag">Display</span></div>
+  <p class="comp-desc">Divides content visually or semantically. Horizontal or vertical.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner preview-col" style="gap:16px">
+        <span style="font-size:13px;color:hsl(var(--muted-foreground))">Section A</span>
+        <div class="separator-h"></div>
+        <span style="font-size:13px;color:hsl(var(--muted-foreground))">Section B</span>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="cm">&lt;!-- Horizontal --&gt;</span>
+<span class="tk">&lt;hr</span> <span class="ky">class</span>=<span class="st">"separator-h"</span> <span class="tk">/&gt;</span>
+
+<span class="cm">&lt;!-- Vertical (inside a flex row) --&gt;</span>
+<span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"separator-v"</span> <span class="ky">aria-orientation</span>=<span class="st">"vertical"</span> <span class="tk">/&gt;</span>
+
+<span class="cm">/* Uses: --border token */</span>
+<span class="cl">.separator-h</span> {
+  <span class="ky">height</span>: <span class="vl">1px</span>;
+  <span class="ky">background</span>: <span class="vl">hsl(var(--border))</span>;
+}</pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Use <code>&lt;hr&gt;</code> for semantic separation of content sections.</div>
+        <div class="dd-item">Add <code>aria-orientation="vertical"</code> for vertical separators in flex layouts.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't overuse separators — white space (margin/padding) should do most of the separating work.</div>
+        <div class="dd-item">Don't add separators between every item in a dense list — use subtle row hover instead.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- PROGRESS -->
+<section class="comp-section" id="progress">
+  <div class="comp-header"><h2 class="comp-title">Progress</h2><span class="comp-tag">Display</span></div>
+  <p class="comp-desc">Communicates task completion. Always pair with a percentage or label.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner preview-col" style="gap:16px">
+        <div style="width:100%;max-width:320px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:hsl(var(--muted-foreground));margin-bottom:6px"><span>Uploading…</span><span>60%</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:60%"></div></div>
+        </div>
+        <div style="width:100%;max-width:320px">
+          <div class="progress-track"><div class="progress-fill" style="width:33%"></div></div>
+        </div>
+        <div style="width:100%;max-width:320px">
+          <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;div</span>
+  <span class="ky">class</span>=<span class="st">"progress-track"</span>
+  <span class="ky">role</span>=<span class="st">"progressbar"</span>
+  <span class="ky">aria-valuenow</span>=<span class="st">"60"</span>
+  <span class="ky">aria-valuemin</span>=<span class="st">"0"</span>
+  <span class="ky">aria-valuemax</span>=<span class="st">"100"</span>
+  <span class="ky">aria-label</span>=<span class="st">"Upload progress"</span>
+<span class="tk">&gt;</span>
+  <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"progress-fill"</span> <span class="ky">style</span>=<span class="st">"width: 60%"</span><span class="tk">&gt;&lt;/div&gt;</span>
+<span class="tk">&lt;/div&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Add <code>role="progressbar"</code> with <code>aria-valuenow/min/max</code> for screen readers.</div>
+        <div class="dd-item">Show a percentage label alongside the bar so users don't have to estimate visually.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't use Progress for indeterminate states — use a Skeleton or spinner instead.</div>
+        <div class="dd-item">Don't jump the progress bar backwards — it confuses users and breaks trust.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- SKELETON -->
+<section class="comp-section" id="skeleton">
+  <div class="comp-header"><h2 class="comp-title">Skeleton</h2><span class="comp-tag">Display</span></div>
+  <p class="comp-desc">Loading placeholder that mirrors the shape of incoming content.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner">
+        <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="skeleton" style="width:40px;height:40px;border-radius:9999px;flex-shrink:0"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+              <div class="skeleton" style="height:14px;width:60%"></div>
+              <div class="skeleton" style="height:12px;width:40%"></div>
+            </div>
+          </div>
+          <div class="skeleton" style="height:14px;width:100%"></div>
+          <div class="skeleton" style="height:14px;width:85%"></div>
+          <div class="skeleton" style="height:14px;width:72%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="cm">&lt;!-- Mirrors the shape of a user card --&gt;</span>
+<span class="tk">&lt;div</span> <span class="ky">aria-busy</span>=<span class="st">"true"</span> <span class="ky">aria-label</span>=<span class="st">"Loading content"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"skeleton"</span>
+    <span class="ky">style</span>=<span class="st">"width:40px;height:40px;border-radius:9999px"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;/div&gt;</span>
+  <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"skeleton"</span>
+    <span class="ky">style</span>=<span class="st">"height:14px;width:60%"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;/div&gt;</span>
+<span class="tk">&lt;/div&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Match the skeleton shape to the actual content layout (avatar circles, text line widths).</div>
+        <div class="dd-item">Add <code>aria-busy="true"</code> on the container and remove it once content loads.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't use a spinner when a Skeleton is possible — skeletons reduce perceived loading time.</div>
+        <div class="dd-item">Don't animate the skeleton indefinitely — replace it with content as soon as data arrives.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- TABS -->
+<section class="comp-section" id="tabs">
+  <div class="comp-header"><h2 class="comp-title">Tabs</h2><span class="comp-tag">Navigation</span></div>
+  <p class="comp-desc">Displays layered content panels, one at a time.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner preview-col" style="gap:0">
+        <div class="tabs-list" id="tabs-demo">
+          <button class="tab-trigger active" onclick="switchTab(this,'account')">Account</button>
+          <button class="tab-trigger" onclick="switchTab(this,'password')">Password</button>
+          <button class="tab-trigger" onclick="switchTab(this,'notifs')">Notifications</button>
+        </div>
+        <div class="tab-content" id="tab-account">Manage your account settings and profile information.</div>
+        <div class="tab-content" id="tab-password" style="display:none">Change your password and security preferences.</div>
+        <div class="tab-content" id="tab-notifs" style="display:none">Configure how and when you receive notifications.</div>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;div</span> <span class="ky">role</span>=<span class="st">"tablist"</span> <span class="ky">class</span>=<span class="st">"tabs-list"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;button</span> <span class="ky">role</span>=<span class="st">"tab"</span> <span class="ky">aria-selected</span>=<span class="st">"true"</span>
+    <span class="ky">aria-controls</span>=<span class="st">"panel-account"</span>
+    <span class="ky">class</span>=<span class="st">"tab-trigger active"</span><span class="tk">&gt;</span>Account<span class="tk">&lt;/button&gt;</span>
+  <span class="tk">&lt;button</span> <span class="ky">role</span>=<span class="st">"tab"</span> <span class="ky">aria-selected</span>=<span class="st">"false"</span>
+    <span class="ky">aria-controls</span>=<span class="st">"panel-password"</span>
+    <span class="ky">class</span>=<span class="st">"tab-trigger"</span><span class="tk">&gt;</span>Password<span class="tk">&lt;/button&gt;</span>
+<span class="tk">&lt;/div&gt;</span>
+<span class="tk">&lt;div</span> <span class="ky">role</span>=<span class="st">"tabpanel"</span> <span class="ky">id</span>=<span class="st">"panel-account"</span><span class="tk">&gt;</span> … <span class="tk">&lt;/div&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Use <code>role="tablist"</code>, <code>role="tab"</code>, <code>role="tabpanel"</code> with <code>aria-selected</code> and <code>aria-controls</code>.</div>
+        <div class="dd-item">Support keyboard navigation: Arrow keys switch tabs, Enter/Space activates.</div>
+        <div class="dd-item">Keep tab labels to 1–2 words; use icons only with a visible label.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't use Tabs for a wizard/multi-step flow — use a stepper component instead.</div>
+        <div class="dd-item">Don't exceed 5–6 tabs; use a Select or sidebar navigation for more options.</div>
+        <div class="dd-item">Don't hide critical information behind a non-default tab without a visual cue (badge, dot).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- TOOLTIP -->
+<section class="comp-section" id="tooltip">
+  <div class="comp-header"><h2 class="comp-title">Tooltip</h2><span class="comp-tag">Feedback</span></div>
+  <p class="comp-desc">Supplementary label for icon-only controls. Shown on hover and focus.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner preview-center" style="gap:32px;padding-top:48px;padding-bottom:48px">
+        <div class="tooltip-wrap">
+          <div class="tooltip-bubble">Copy to clipboard</div>
+          <button class="btn btn-md btn-outline">Hover me</button>
+        </div>
+        <div class="tooltip-wrap">
+          <div class="tooltip-bubble">Delete this item permanently</div>
+          <button class="btn btn-md btn-ghost">Delete</button>
+        </div>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"tooltip-wrap"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"tooltip-bubble"</span> <span class="ky">role</span>=<span class="st">"tooltip"</span> <span class="ky">id</span>=<span class="st">"tt1"</span><span class="tk">&gt;</span>
+    Copy to clipboard
+  <span class="tk">&lt;/div&gt;</span>
+  <span class="tk">&lt;button</span>
+    <span class="ky">aria-describedby</span>=<span class="st">"tt1"</span>
+    <span class="ky">class</span>=<span class="st">"btn btn-md btn-outline"</span>
+  <span class="tk">&gt;</span>Copy<span class="tk">&lt;/button&gt;</span>
+<span class="tk">&lt;/div&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Use for icon-only buttons where the action isn't immediately obvious.</div>
+        <div class="dd-item">Add <code>role="tooltip"</code> and link via <code>aria-describedby</code>.</div>
+        <div class="dd-item">Keep tooltip text under 10 words — supplementary, never essential.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't put interactive content (links, buttons) inside a tooltip.</div>
+        <div class="dd-item">Don't use tooltips on mobile — hover doesn't exist. Use a help icon that opens a popover.</div>
+        <div class="dd-item">Don't duplicate the button's visible label in a tooltip — it's redundant.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- DIALOG -->
+<section class="comp-section" id="dialog">
+  <div class="comp-header"><h2 class="comp-title">Dialog</h2><span class="comp-tag">Overlay</span></div>
+  <p class="comp-desc">Interrupts the user to request a decision or collect input. Use sparingly.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner preview-center">
+        <div class="dialog-demo">
+          <div class="dialog-header">
+            <div class="dialog-title">Edit profile</div>
+            <div class="dialog-desc">Update your display name and email address.</div>
+          </div>
+          <div class="dialog-body">
+            <div class="form-field" style="max-width:100%">
+              <label class="label" for="dlg-name">Name</label>
+              <input class="input" id="dlg-name" value="Arun Kumar" style="max-width:100%;width:100%" />
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button class="btn btn-sm btn-outline">Cancel</button>
+            <button class="btn btn-sm btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;dialog</span>
+  <span class="ky">class</span>=<span class="st">"dialog-demo"</span>
+  <span class="ky">role</span>=<span class="st">"dialog"</span>
+  <span class="ky">aria-modal</span>=<span class="st">"true"</span>
+  <span class="ky">aria-labelledby</span>=<span class="st">"dlg-title"</span>
+<span class="tk">&gt;</span>
+  <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"dialog-header"</span><span class="tk">&gt;</span>
+    <span class="tk">&lt;h2</span> <span class="ky">class</span>=<span class="st">"dialog-title"</span> <span class="ky">id</span>=<span class="st">"dlg-title"</span><span class="tk">&gt;</span>
+      Edit profile
+    <span class="tk">&lt;/h2&gt;</span>
+  <span class="tk">&lt;/div&gt;</span>
+  <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"dialog-footer"</span><span class="tk">&gt;</span>
+    <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"btn btn-sm btn-outline"</span><span class="tk">&gt;</span>Cancel<span class="tk">&lt;/button&gt;</span>
+    <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"btn btn-sm btn-primary"</span><span class="tk">&gt;</span>Save<span class="tk">&lt;/button&gt;</span>
+  <span class="tk">&lt;/div&gt;</span>
+<span class="tk">&lt;/dialog&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Use the native <code>&lt;dialog&gt;</code> element — it handles focus trap and <kbd>Esc</kbd> automatically.</div>
+        <div class="dd-item">Add <code>aria-modal="true"</code> and <code>aria-labelledby</code> pointing to the title.</div>
+        <div class="dd-item">Return focus to the trigger element when the dialog closes.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't open a dialog from within a dialog — flatten to a single multi-step flow.</div>
+        <div class="dd-item">Don't use dialogs for simple notifications — use Toast or Alert instead.</div>
+        <div class="dd-item">Don't skip the overlay backdrop — without it, users lose sense of modal context.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- DROPDOWN -->
+<section class="comp-section" id="dropdown">
+  <div class="comp-header"><h2 class="comp-title">Dropdown Menu</h2><span class="comp-tag">Overlay</span></div>
+  <p class="comp-desc">Contextual list of actions triggered by a button. Supports keyboard shortcuts.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner preview-center">
+        <div class="dropdown-demo">
+          <div class="dropdown-item">Profile <span class="dropdown-shortcut">⇧⌘P</span></div>
+          <div class="dropdown-item">Billing <span class="dropdown-shortcut">⌘B</span></div>
+          <div class="dropdown-item">Settings <span class="dropdown-shortcut">⌘S</span></div>
+          <div class="dropdown-sep"></div>
+          <div class="dropdown-item destructive">Log out <span class="dropdown-shortcut">⇧⌘Q</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;ul</span> <span class="ky">role</span>=<span class="st">"menu"</span> <span class="ky">class</span>=<span class="st">"dropdown-demo"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;li</span> <span class="ky">role</span>=<span class="st">"menuitem"</span> <span class="ky">class</span>=<span class="st">"dropdown-item"</span><span class="tk">&gt;</span>
+    Profile
+    <span class="tk">&lt;kbd</span> <span class="ky">class</span>=<span class="st">"dropdown-shortcut"</span><span class="tk">&gt;</span>⇧⌘P<span class="tk">&lt;/kbd&gt;</span>
+  <span class="tk">&lt;/li&gt;</span>
+  <span class="tk">&lt;li</span> <span class="ky">role</span>=<span class="st">"separator"</span> <span class="ky">class</span>=<span class="st">"dropdown-sep"</span><span class="tk">&gt;&lt;/li&gt;</span>
+  <span class="tk">&lt;li</span> <span class="ky">role</span>=<span class="st">"menuitem"</span>
+    <span class="ky">class</span>=<span class="st">"dropdown-item destructive"</span><span class="tk">&gt;</span>
+    Log out
+  <span class="tk">&lt;/li&gt;</span>
+<span class="tk">&lt;/ul&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Use <code>role="menu"</code> and <code>role="menuitem"</code> so screen readers read it as a menu.</div>
+        <div class="dd-item">Group related actions with a separator. Put destructive actions last, visually separated.</div>
+        <div class="dd-item">Close on outside click, <kbd>Esc</kbd>, and after any item selection.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't use Dropdown for navigation — use a nav component with links instead.</div>
+        <div class="dd-item">Don't put more than 8–10 items in a dropdown — use a modal with a list instead.</div>
+        <div class="dd-item">Don't disable menu items without explaining why (tooltip or section label).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- BREADCRUMB -->
+<section class="comp-section" id="breadcrumb">
+  <div class="comp-header"><h2 class="comp-title">Breadcrumb</h2><span class="comp-tag">Navigation</span></div>
+  <p class="comp-desc">Shows the user's location in a hierarchy. Always make ancestor links clickable.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner">
+        <nav aria-label="Breadcrumb">
+          <div class="breadcrumb">
+            <a class="breadcrumb-item" href="#">Home</a>
+            <span class="breadcrumb-sep">/</span>
+            <a class="breadcrumb-item" href="#">Components</a>
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-item current" aria-current="page">Breadcrumb</span>
+          </div>
+        </nav>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;nav</span> <span class="ky">aria-label</span>=<span class="st">"Breadcrumb"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;ol</span> <span class="ky">class</span>=<span class="st">"breadcrumb"</span><span class="tk">&gt;</span>
+    <span class="tk">&lt;li&gt;&lt;a</span> <span class="ky">class</span>=<span class="st">"breadcrumb-item"</span> <span class="ky">href</span>=<span class="st">"/"</span><span class="tk">&gt;</span>Home<span class="tk">&lt;/a&gt;&lt;/li&gt;</span>
+    <span class="tk">&lt;li</span> <span class="ky">aria-hidden</span>=<span class="st">"true"</span><span class="tk">&gt;&lt;span</span> <span class="ky">class</span>=<span class="st">"breadcrumb-sep"</span><span class="tk">&gt;</span>/<span class="tk">&lt;/span&gt;&lt;/li&gt;</span>
+    <span class="tk">&lt;li&gt;&lt;span</span>
+      <span class="ky">class</span>=<span class="st">"breadcrumb-item current"</span>
+      <span class="ky">aria-current</span>=<span class="st">"page"</span>
+    <span class="tk">&gt;</span>Button<span class="tk">&lt;/span&gt;&lt;/li&gt;</span>
+  <span class="tk">&lt;/ol&gt;</span>
+<span class="tk">&lt;/nav&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Wrap in <code>&lt;nav aria-label="Breadcrumb"&gt;</code> and use <code>&lt;ol&gt;</code> for semantic order.</div>
+        <div class="dd-item">Mark the current page with <code>aria-current="page"</code> and make it non-clickable.</div>
+        <div class="dd-item">Add <code>aria-hidden="true"</code> to separator characters so screen readers skip them.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't show breadcrumbs on top-level pages — only relevant from depth 2+.</div>
+        <div class="dd-item">Don't truncate crumbs aggressively on mobile — show at least Home → … → Current.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- PAGINATION -->
+<section class="comp-section" id="pagination">
+  <div class="comp-header"><h2 class="comp-title">Pagination</h2><span class="comp-tag">Navigation</span></div>
+  <p class="comp-desc">Navigate between pages of a dataset. Always show the current page and total context.</p>
+  <div class="comp-body">
+    <div class="preview-pane">
+      <div class="preview-inner preview-center">
+        <nav aria-label="Pagination" class="pagination">
+          <button class="page-btn" aria-label="Previous page">‹</button>
+          <button class="page-btn">1</button>
+          <button class="page-btn active" aria-current="page">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn" aria-hidden="true" style="border:none;background:transparent;cursor:default">…</button>
+          <button class="page-btn">10</button>
+          <button class="page-btn" aria-label="Next page">›</button>
+        </nav>
+      </div>
+    </div>
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;nav</span> <span class="ky">aria-label</span>=<span class="st">"Pagination"</span> <span class="ky">class</span>=<span class="st">"pagination"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn"</span> <span class="ky">aria-label</span>=<span class="st">"Previous"</span><span class="tk">&gt;</span>‹<span class="tk">&lt;/button&gt;</span>
+  <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn"</span><span class="tk">&gt;</span>1<span class="tk">&lt;/button&gt;</span>
+  <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn active"</span>
+    <span class="ky">aria-current</span>=<span class="st">"page"</span><span class="tk">&gt;</span>2<span class="tk">&lt;/button&gt;</span>
+  <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn"</span> <span class="ky">aria-label</span>=<span class="st">"Next"</span><span class="tk">&gt;</span>›<span class="tk">&lt;/button&gt;</span>
+<span class="tk">&lt;/nav&gt;</span></pre>
+    </div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Use <code>aria-current="page"</code> on the active page button.</div>
+        <div class="dd-item">Show First/Last page buttons when the dataset is large (100+ pages).</div>
+        <div class="dd-item">Consider showing "Page X of Y" as a text label beside the controls on mobile.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't show pagination for fewer than 2 pages.</div>
+        <div class="dd-item">Don't use pagination when infinite scroll is active — pick one pattern per list.</div>
+        <div class="dd-item">Don't disable the Previous button on page 1 silently — hide it or clearly dim with aria-disabled.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- bottom padding -->
+<div style="height:80px"></div>
+</div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// Theme toggle
+function toggleTheme(btn) {
+  document.body.classList.toggle('dark');
+  btn.textContent = document.body.classList.contains('dark') ? '☀️ Light mode' : '🌙 Dark mode';
+}
+
+// Active sidebar link on scroll
+const sections = document.querySelectorAll('.comp-section');
+const links = document.querySelectorAll('.sidebar-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.sidebar-link[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+
+// Copy code button
+function copyCode(btn) {
+  const pre = btn.closest('.code-pane').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+// Tab switcher
+function switchTab(btn, id) {
+  btn.closest('.preview-inner').querySelectorAll('.tab-trigger').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  btn.closest('.preview-inner').querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+  document.getElementById('tab-' + id).style.display = '';
+}
+</script>
+</body>
+</html>
