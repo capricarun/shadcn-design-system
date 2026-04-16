@@ -451,17 +451,62 @@ pre{
 .breadcrumb-sep{color:hsl(var(--muted-foreground));user-select:none}
 
 /* Pagination */
-.pagination{display:flex;align-items:center;gap:4px}
+.pagination{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%}
+.pag-center{display:flex;align-items:center;gap:4px}
 .page-btn{
   width:36px;height:36px;border-radius:var(--radius);
-  border:1px solid hsl(var(--border));background:hsl(var(--background));
+  border:1px solid transparent;background:transparent;
   color:hsl(var(--foreground));cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;
   display:inline-flex;align-items:center;justify-content:center;
-  transition:background 150ms,color 150ms;
+  transition:background 150ms,color 150ms,border-color 150ms;
 }
 .page-btn:hover:not(.active):not(:disabled){background:hsl(var(--accent))}
-.page-btn.active{background:hsl(var(--primary));color:hsl(var(--primary-foreground));border-color:hsl(var(--primary))}
+.page-btn.active{border-color:hsl(var(--foreground));background:transparent;color:hsl(var(--foreground))}
 .page-btn:disabled{opacity:.5;pointer-events:none}
+.page-ellipsis{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:hsl(var(--muted-foreground));cursor:default}
+.pag-nav{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:0 14px;height:36px;border-radius:var(--radius);
+  border:1px solid hsl(var(--border));background:hsl(var(--background));
+  color:hsl(var(--foreground));cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;
+  transition:background 150ms;white-space:nowrap;
+}
+.pag-nav:hover:not(:disabled){background:hsl(var(--accent))}
+.pag-nav:disabled{opacity:.4;pointer-events:none}
+.pag-arrow{font-size:11px;line-height:1}
+
+/* Table */
+.tbl-wrap{width:100%;overflow-x:auto;border-radius:calc(var(--radius)*2);border:1px solid hsl(var(--border))}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl thead tr{background:hsl(var(--muted))}
+.tbl th{
+  padding:10px 16px;text-align:left;
+  font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:hsl(var(--muted-foreground));white-space:nowrap;
+  border-bottom:1px solid hsl(var(--border));
+}
+.tbl th.sortable{cursor:pointer;user-select:none;transition:color 120ms}
+.tbl th.sortable:hover{color:hsl(var(--foreground))}
+.tbl th .sort-icon{margin-left:4px;opacity:.35;font-size:10px}
+.tbl th.sort-asc .sort-icon::after{content:'↑';opacity:1}
+.tbl th.sort-desc .sort-icon::after{content:'↓';opacity:1}
+.tbl th:not(.sort-asc):not(.sort-desc) .sort-icon::after{content:'↕'}
+.tbl td{
+  padding:12px 16px;border-bottom:1px solid hsl(var(--border));
+  color:hsl(var(--foreground));vertical-align:middle;
+}
+.tbl tbody tr{background:hsl(var(--card));transition:background 100ms}
+.tbl tbody tr:hover{background:hsl(var(--muted) / 0.6)}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl-muted{color:hsl(var(--muted-foreground));font-size:12px;margin-top:2px}
+.tbl-check{width:16px;height:16px;accent-color:hsl(var(--primary));cursor:pointer}
+.tbl-action-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 10px;border-radius:var(--radius);border:1px solid hsl(var(--border));
+  background:transparent;color:hsl(var(--foreground));
+  font-family:inherit;font-size:12px;cursor:pointer;transition:background 100ms;
+}
+.tbl-action-btn:hover{background:hsl(var(--accent))}
 
 /* Dialog (non-modal demo) */
 .dialog-demo{
@@ -722,6 +767,7 @@ body.nav-open .overlay{display:block;opacity:1}
     <a class="sidebar-link" href="#tabs">Tabs</a>
     <a class="sidebar-link" href="#breadcrumb">Breadcrumb</a>
     <a class="sidebar-link" href="#pagination">Pagination</a>
+    <a class="sidebar-link" href="#table">Table</a>
   </div>
 </nav>
 
@@ -1703,43 +1749,216 @@ body.nav-open .overlay{display:block;opacity:1}
 <!-- PAGINATION -->
 <section class="comp-section" id="pagination">
   <div class="comp-header"><h2 class="comp-title">Pagination</h2><span class="comp-tag">Navigation</span></div>
-  <p class="comp-desc">Navigate between pages of a dataset. Always show the current page and total context.</p>
+  <p class="comp-desc">Navigate between pages of a dataset. Previous/Next text buttons flank numbered page buttons. The active page is indicated with a border — no fill — matching the shadcn token system.</p>
   <div class="comp-body">
     <div class="preview-pane">
-      <div class="preview-inner preview-center">
-        <nav aria-label="Pagination" class="pagination">
-          <button class="page-btn" aria-label="Previous page">‹</button>
-          <button class="page-btn">1</button>
-          <button class="page-btn active" aria-current="page">2</button>
-          <button class="page-btn">3</button>
-          <button class="page-btn" aria-hidden="true" style="border:none;background:transparent;cursor:default">…</button>
-          <button class="page-btn">10</button>
-          <button class="page-btn" aria-label="Next page">›</button>
+      <div class="preview-label">Interactive — click a page</div>
+      <div class="preview-inner" style="padding:24px 20px">
+        <nav aria-label="Pagination" class="pagination" id="pag-demo" style="max-width:520px;width:100%">
+          <button class="pag-nav" id="pag-prev" onclick="pagGo(-1)" aria-label="Previous page">
+            <span class="pag-arrow">‹</span> Previous
+          </button>
+          <div class="pag-center" id="pag-pages"></div>
+          <button class="pag-nav" id="pag-next" onclick="pagGo(1)" aria-label="Next page">
+            Next <span class="pag-arrow">›</span>
+          </button>
         </nav>
       </div>
     </div>
     <div class="code-pane">
-      <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-header"><span class="code-lang">HTML + CSS</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <pre><span class="tk">&lt;nav</span> <span class="ky">aria-label</span>=<span class="st">"Pagination"</span> <span class="ky">class</span>=<span class="st">"pagination"</span><span class="tk">&gt;</span>
-  <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn"</span> <span class="ky">aria-label</span>=<span class="st">"Previous"</span><span class="tk">&gt;</span>‹<span class="tk">&lt;/button&gt;</span>
-  <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn"</span><span class="tk">&gt;</span>1<span class="tk">&lt;/button&gt;</span>
-  <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn active"</span>
-    <span class="ky">aria-current</span>=<span class="st">"page"</span><span class="tk">&gt;</span>2<span class="tk">&lt;/button&gt;</span>
-  <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn"</span> <span class="ky">aria-label</span>=<span class="st">"Next"</span><span class="tk">&gt;</span>›<span class="tk">&lt;/button&gt;</span>
-<span class="tk">&lt;/nav&gt;</span></pre>
+
+  <span class="cm">&lt;!-- Previous --&gt;</span>
+  <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"pag-nav"</span> <span class="ky">aria-label</span>=<span class="st">"Previous page"</span><span class="tk">&gt;</span>‹ Previous<span class="tk">&lt;/button&gt;</span>
+
+  <span class="cm">&lt;!-- Page numbers --&gt;</span>
+  <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"pag-center"</span><span class="tk">&gt;</span>
+    <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn"</span><span class="tk">&gt;</span>1<span class="tk">&lt;/button&gt;</span>
+    <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn active"</span> <span class="ky">aria-current</span>=<span class="st">"page"</span><span class="tk">&gt;</span>2<span class="tk">&lt;/button&gt;</span>
+    <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn"</span><span class="tk">&gt;</span>3<span class="tk">&lt;/button&gt;</span>
+    <span class="tk">&lt;span</span>  <span class="ky">class</span>=<span class="st">"page-ellipsis"</span><span class="tk">&gt;</span>…<span class="tk">&lt;/span&gt;</span>
+    <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"page-btn"</span><span class="tk">&gt;</span>10<span class="tk">&lt;/button&gt;</span>
+  <span class="tk">&lt;/div&gt;</span>
+
+  <span class="cm">&lt;!-- Next --&gt;</span>
+  <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"pag-nav"</span> <span class="ky">aria-label</span>=<span class="st">"Next page"</span><span class="tk">&gt;</span>Next ›<span class="tk">&lt;/button&gt;</span>
+
+<span class="tk">&lt;/nav&gt;</span>
+
+<span class="cm">/* Key tokens */</span>
+<span class="cl">.page-btn.active</span> { <span class="ky">border-color</span>: <span class="vl">hsl(var(--foreground))</span>; }
+<span class="cl">.pag-nav</span>         { <span class="ky">border</span>: <span class="vl">1px solid hsl(var(--border))</span>; }</pre>
     </div>
+    <table class="prop-table">
+      <thead><tr><th>Class</th><th>Element</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>.pagination</code></td><td><code>&lt;nav&gt;</code></td><td>Flex container, space-between layout</td></tr>
+        <tr><td><code>.pag-nav</code></td><td><code>&lt;button&gt;</code></td><td>Previous / Next text buttons with border</td></tr>
+        <tr><td><code>.pag-center</code></td><td><code>&lt;div&gt;</code></td><td>Wraps page number buttons</td></tr>
+        <tr><td><code>.page-btn</code></td><td><code>&lt;button&gt;</code></td><td>Individual page number — 36×36px</td></tr>
+        <tr><td><code>.page-btn.active</code></td><td>—</td><td>Current page — <code>--foreground</code> border, no fill</td></tr>
+        <tr><td><code>.page-ellipsis</code></td><td><code>&lt;span&gt;</code></td><td>Non-interactive ellipsis gap indicator</td></tr>
+      </tbody>
+    </table>
     <div class="dd-grid">
       <div class="dd-card dd-do">
         <div class="dd-head">✓ Do</div>
-        <div class="dd-item">Use <code>aria-current="page"</code> on the active page button.</div>
-        <div class="dd-item">Show First/Last page buttons when the dataset is large (100+ pages).</div>
-        <div class="dd-item">Consider showing "Page X of Y" as a text label beside the controls on mobile.</div>
+        <div class="dd-item">Always add <code>aria-current="page"</code> to the active page button for screen readers.</div>
+        <div class="dd-item">Use <code>disabled</code> on Previous at page 1 and Next at the last page.</div>
+        <div class="dd-item">Use the ellipsis <code>&lt;span class="page-ellipsis"&gt;</code> to indicate skipped ranges — always non-interactive.</div>
+        <div class="dd-item">Pair with a "Page X of Y" label on mobile where space is limited.</div>
       </div>
       <div class="dd-card dd-dont">
         <div class="dd-head">✕ Don't</div>
-        <div class="dd-item">Don't show pagination for fewer than 2 pages.</div>
-        <div class="dd-item">Don't use pagination when infinite scroll is active — pick one pattern per list.</div>
-        <div class="dd-item">Don't disable the Previous button on page 1 silently — hide it or clearly dim with aria-disabled.</div>
+        <div class="dd-item">Don't show pagination for fewer than 2 pages — conditionally render it.</div>
+        <div class="dd-item">Don't mix pagination and infinite scroll in the same list view.</div>
+        <div class="dd-item">Don't hard-code colors — use <code>--foreground</code>, <code>--border</code>, <code>--accent</code> tokens.</div>
+        <div class="dd-item">Don't show more than ~7 page buttons without an ellipsis — truncate long ranges.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- TABLE -->
+<section class="comp-section" id="table">
+  <div class="comp-header"><h2 class="comp-title">Table</h2><span class="comp-tag">Data</span></div>
+  <p class="comp-desc">Displays structured data in rows and columns. Supports sortable headers, status badges, checkboxes, and row actions. Built entirely on design tokens — switches between Light and Dark mode automatically.</p>
+  <div class="comp-body">
+
+    <!-- Live preview -->
+    <div class="preview-pane">
+      <div class="preview-label">Data Table — sortable, with status badges</div>
+      <div class="preview-inner" style="padding:0;display:block">
+        <div class="tbl-wrap">
+          <table class="tbl" id="demo-tbl">
+            <thead>
+              <tr>
+                <th style="width:36px"><input type="checkbox" class="tbl-check" id="chk-all" onchange="tblSelectAll(this)"></th>
+                <th class="sortable" onclick="tblSort(this,0)" data-col="0">Name <span class="sort-icon"></span></th>
+                <th class="sortable" onclick="tblSort(this,1)" data-col="1">Email <span class="sort-icon"></span></th>
+                <th class="sortable" onclick="tblSort(this,2)" data-col="2">Role <span class="sort-icon"></span></th>
+                <th class="sortable" onclick="tblSort(this,3)" data-col="3">Status <span class="sort-icon"></span></th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-body">
+              <tr>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk"></td>
+                <td><div>Alice Johnson</div><div class="tbl-muted">Designer</div></td>
+                <td>alice@example.com</td>
+                <td>Admin</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td style="text-align:right"><button class="tbl-action-btn">Edit</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk"></td>
+                <td><div>Bob Martinez</div><div class="tbl-muted">Engineer</div></td>
+                <td>bob@example.com</td>
+                <td>Member</td>
+                <td><span class="badge badge-warning">Pending</span></td>
+                <td style="text-align:right"><button class="tbl-action-btn">Edit</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk"></td>
+                <td><div>Carol White</div><div class="tbl-muted">Product</div></td>
+                <td>carol@example.com</td>
+                <td>Member</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td style="text-align:right"><button class="tbl-action-btn">Edit</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk"></td>
+                <td><div>David Kim</div><div class="tbl-muted">Marketing</div></td>
+                <td>david@example.com</td>
+                <td>Viewer</td>
+                <td><span class="badge badge-outline">Inactive</span></td>
+                <td style="text-align:right"><button class="tbl-action-btn">Edit</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk"></td>
+                <td><div>Eva Chen</div><div class="tbl-muted">Engineering</div></td>
+                <td>eva@example.com</td>
+                <td>Admin</td>
+                <td><span class="badge badge-destructive">Suspended</span></td>
+                <td style="text-align:right"><button class="tbl-action-btn">Edit</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code -->
+    <div class="code-pane">
+      <div class="code-header"><span class="code-lang">HTML + CSS</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"tbl-wrap"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;table</span> <span class="ky">class</span>=<span class="st">"tbl"</span><span class="tk">&gt;</span>
+    <span class="tk">&lt;thead&gt;</span>
+      <span class="tk">&lt;tr&gt;</span>
+        <span class="tk">&lt;th&gt;&lt;input</span> <span class="ky">type</span>=<span class="st">"checkbox"</span> <span class="ky">class</span>=<span class="st">"tbl-check"</span><span class="tk">&gt;&lt;/th&gt;</span>
+        <span class="tk">&lt;th</span> <span class="ky">class</span>=<span class="st">"sortable"</span><span class="tk">&gt;</span>Name <span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"sort-icon"</span><span class="tk">&gt;&lt;/span&gt;&lt;/th&gt;</span>
+        <span class="tk">&lt;th</span> <span class="ky">class</span>=<span class="st">"sortable"</span><span class="tk">&gt;</span>Status <span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"sort-icon"</span><span class="tk">&gt;&lt;/span&gt;&lt;/th&gt;</span>
+        <span class="tk">&lt;th&gt;</span>Actions<span class="tk">&lt;/th&gt;</span>
+      <span class="tk">&lt;/tr&gt;</span>
+    <span class="tk">&lt;/thead&gt;</span>
+    <span class="tk">&lt;tbody&gt;</span>
+      <span class="tk">&lt;tr&gt;</span>
+        <span class="tk">&lt;td&gt;&lt;input</span> <span class="ky">type</span>=<span class="st">"checkbox"</span> <span class="ky">class</span>=<span class="st">"tbl-check"</span><span class="tk">&gt;&lt;/td&gt;</span>
+        <span class="tk">&lt;td&gt;</span>
+          <span class="tk">&lt;div&gt;</span>Alice Johnson<span class="tk">&lt;/div&gt;</span>
+          <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"tbl-muted"</span><span class="tk">&gt;</span>Designer<span class="tk">&lt;/div&gt;</span>
+        <span class="tk">&lt;/td&gt;</span>
+        <span class="tk">&lt;td&gt;&lt;span</span> <span class="ky">class</span>=<span class="st">"badge badge-success"</span><span class="tk">&gt;</span>Active<span class="tk">&lt;/span&gt;&lt;/td&gt;</span>
+        <span class="tk">&lt;td&gt;&lt;button</span> <span class="ky">class</span>=<span class="st">"tbl-action-btn"</span><span class="tk">&gt;</span>Edit<span class="tk">&lt;/button&gt;&lt;/td&gt;</span>
+      <span class="tk">&lt;/tr&gt;</span>
+    <span class="tk">&lt;/tbody&gt;</span>
+  <span class="tk">&lt;/table&gt;</span>
+<span class="tk">&lt;/div&gt;</span>
+
+<span class="cm">/* Key tokens */</span>
+<span class="cl">.tbl thead tr</span> { <span class="ky">background</span>: <span class="vl">hsl(var(--muted))</span>; }
+<span class="cl">.tbl th</span>       { <span class="ky">color</span>: <span class="vl">hsl(var(--muted-foreground))</span>; }
+<span class="cl">.tbl tbody tr</span> { <span class="ky">background</span>: <span class="vl">hsl(var(--card))</span>; }
+<span class="cl">.tbl td</span>       { <span class="ky">color</span>: <span class="vl">hsl(var(--foreground))</span>; }
+<span class="cl">.tbl td</span>       { <span class="ky">border-bottom</span>: <span class="vl">1px solid hsl(var(--border))</span>; }</pre>
+    </div>
+
+    <!-- Props -->
+    <table class="prop-table">
+      <thead><tr><th>Class</th><th>Element</th><th>Token Used</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>.tbl-wrap</code></td><td><code>&lt;div&gt;</code></td><td><code>--border</code></td><td>Scrollable container with rounded border</td></tr>
+        <tr><td><code>.tbl</code></td><td><code>&lt;table&gt;</code></td><td>—</td><td>Base table, <code>border-collapse: collapse</code>, 13px font</td></tr>
+        <tr><td><code>.tbl thead tr</code></td><td>—</td><td><code>--muted</code></td><td>Header row background</td></tr>
+        <tr><td><code>.tbl th</code></td><td>—</td><td><code>--muted-foreground</code></td><td>Uppercase 11px header labels</td></tr>
+        <tr><td><code>.tbl th.sortable</code></td><td>—</td><td><code>--foreground</code> on hover</td><td>Clickable header with sort indicator</td></tr>
+        <tr><td><code>.tbl tbody tr</code></td><td>—</td><td><code>--card</code></td><td>Row background</td></tr>
+        <tr><td><code>.tbl tbody tr:hover</code></td><td>—</td><td><code>--muted</code></td><td>Row hover highlight</td></tr>
+        <tr><td><code>.tbl-muted</code></td><td><code>&lt;div&gt;</code></td><td><code>--muted-foreground</code></td><td>Secondary text below main cell value</td></tr>
+        <tr><td><code>.tbl-check</code></td><td><code>&lt;input&gt;</code></td><td><code>--primary</code></td><td>Checkbox, accent-color tied to primary token</td></tr>
+        <tr><td><code>.tbl-action-btn</code></td><td><code>&lt;button&gt;</code></td><td><code>--border</code>, <code>--accent</code></td><td>Inline row action button</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Do's & Don'ts -->
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-head">✓ Do</div>
+        <div class="dd-item">Always wrap with <code>.tbl-wrap</code> for horizontal scroll on narrow viewports.</div>
+        <div class="dd-item">Use <code>.sortable</code> + <code>.sort-icon</code> on headers to signal interactivity.</div>
+        <div class="dd-item">Use status <strong>Badges</strong> inside cells to convey state — Active, Pending, Inactive, Suspended.</div>
+        <div class="dd-item">Include a "select all" checkbox in the header when bulk actions are available.</div>
+        <div class="dd-item">Keep action buttons minimal — "Edit" or a ⋯ icon menu, not a full toolbar per row.</div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-head">✕ Don't</div>
+        <div class="dd-item">Don't hard-code cell background colors — always use <code>--card</code>, <code>--muted</code> tokens.</div>
+        <div class="dd-item">Don't put more than 3–4 action buttons in a row — use a dropdown instead.</div>
+        <div class="dd-item">Don't omit the header row — tables without headers are inaccessible.</div>
+        <div class="dd-item">Don't make non-sortable columns look sortable — only add <code>.sortable</code> where it's functional.</div>
       </div>
     </div>
   </div>
@@ -1821,6 +2040,57 @@ function copyCode(btn) {
     btn.classList.add('copied');
     setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
   });
+}
+
+// ── Pagination demo ───────────────────────────────────────────
+(function(){
+  const TOTAL=10, WINDOW=3;
+  let cur=2;
+  function render(){
+    const pages=document.getElementById('pag-pages');
+    const prev=document.getElementById('pag-prev');
+    const next=document.getElementById('pag-next');
+    if(!pages) return;
+    prev.disabled=(cur===1);
+    next.disabled=(cur===TOTAL);
+    let html='';
+    // Always show page 1
+    html+=pagBtn(1);
+    if(cur>WINDOW+1) html+='<span class="page-ellipsis">…</span>';
+    for(let p=Math.max(2,cur-1);p<=Math.min(TOTAL-1,cur+1);p++) html+=pagBtn(p);
+    if(cur<TOTAL-WINDOW) html+='<span class="page-ellipsis">…</span>';
+    if(TOTAL>1) html+=pagBtn(TOTAL);
+    pages.innerHTML=html;
+    pages.querySelectorAll('.page-btn').forEach(b=>{
+      b.onclick=()=>{ cur=+b.dataset.p; render(); };
+    });
+  }
+  function pagBtn(p){
+    const a=p===cur?' active" aria-current="page':"";
+    return `<button class="page-btn${a}" data-p="${p}">${p}</button>`;
+  }
+  window.pagGo=function(d){ cur=Math.max(1,Math.min(TOTAL,cur+d)); render(); };
+  render();
+})();
+
+// ── Table sort ────────────────────────────────────────────────
+function tblSort(th, col) {
+  const tbl = th.closest('table');
+  const tbody = tbl.querySelector('tbody');
+  const ths = tbl.querySelectorAll('th.sortable');
+  const asc = th.classList.contains('sort-asc');
+  ths.forEach(h => { h.classList.remove('sort-asc','sort-desc'); });
+  th.classList.add(asc ? 'sort-desc' : 'sort-asc');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.sort((a,b)=>{
+    const ca=a.cells[col+1]?.innerText.trim().toLowerCase()||'';
+    const cb=b.cells[col+1]?.innerText.trim().toLowerCase()||'';
+    return asc ? cb.localeCompare(ca) : ca.localeCompare(cb);
+  });
+  rows.forEach(r=>tbody.appendChild(r));
+}
+function tblSelectAll(chk){
+  document.querySelectorAll('.tbl-row-chk').forEach(c=>c.checked=chk.checked);
 }
 
 // ── Tab switcher ──────────────────────────────────────────────
