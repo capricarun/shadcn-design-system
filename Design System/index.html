@@ -476,12 +476,34 @@ pre{
 .pag-arrow{font-size:11px;line-height:1}
 
 /* Table */
+/* Table toolbar */
+.tbl-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.tbl-filter{
+  flex:0 0 auto;width:280px;height:36px;
+  padding:0 12px;border-radius:var(--radius);
+  border:1px solid hsl(var(--border));
+  background:hsl(var(--background));color:hsl(var(--foreground));
+  font-family:inherit;font-size:14px;outline:none;
+  transition:border-color 150ms;
+}
+.tbl-filter::placeholder{color:hsl(var(--muted-foreground))}
+.tbl-filter:focus{border-color:hsl(var(--ring))}
+.tbl-col-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  height:36px;padding:0 14px;border-radius:var(--radius);
+  border:1px solid hsl(var(--border));
+  background:hsl(var(--background));color:hsl(var(--foreground));
+  font-family:inherit;font-size:14px;cursor:pointer;
+  transition:background 150ms;white-space:nowrap;
+}
+.tbl-col-btn:hover{background:hsl(var(--accent))}
+/* Table core */
 .tbl-wrap{width:100%;overflow-x:auto;border-radius:calc(var(--radius)*2);border:1px solid hsl(var(--border))}
-.tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl thead tr{background:hsl(var(--muted))}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl thead tr{background:hsl(var(--card))}
 .tbl th{
-  padding:10px 16px;text-align:left;
-  font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:0 16px;height:44px;text-align:left;
+  font-size:14px;font-weight:500;
   color:hsl(var(--muted-foreground));white-space:nowrap;
   border-bottom:1px solid hsl(var(--border));
 }
@@ -492,21 +514,46 @@ pre{
 .tbl th.sort-desc .sort-icon::after{content:'↓';opacity:1}
 .tbl th:not(.sort-asc):not(.sort-desc) .sort-icon::after{content:'↕'}
 .tbl td{
-  padding:12px 16px;border-bottom:1px solid hsl(var(--border));
+  padding:0 16px;height:48px;border-bottom:1px solid hsl(var(--border));
   color:hsl(var(--foreground));vertical-align:middle;
 }
-.tbl tbody tr{background:hsl(var(--card));transition:background 100ms}
-.tbl tbody tr:hover{background:hsl(var(--muted) / 0.6)}
+.tbl tbody tr{background:hsl(var(--card))}
+.tbl tbody tr:hover{background:hsl(var(--accent) / 0.5)}
 .tbl tbody tr:last-child td{border-bottom:none}
-.tbl-muted{color:hsl(var(--muted-foreground));font-size:12px;margin-top:2px}
 .tbl-check{width:16px;height:16px;accent-color:hsl(var(--primary));cursor:pointer}
-.tbl-action-btn{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:4px 10px;border-radius:var(--radius);border:1px solid hsl(var(--border));
-  background:transparent;color:hsl(var(--foreground));
-  font-family:inherit;font-size:12px;cursor:pointer;transition:background 100ms;
+/* Column dropdown */
+.tbl-col-wrap{position:relative}
+.tbl-col-dd{
+  position:absolute;top:calc(100% + 6px);right:0;
+  background:hsl(var(--card));
+  border:1px solid hsl(var(--border));
+  border-radius:var(--radius);
+  box-shadow:0 8px 24px rgba(0,0,0,.10);
+  padding:4px;min-width:160px;z-index:60;display:none;
 }
-.tbl-action-btn:hover{background:hsl(var(--accent))}
+.tbl-col-dd.open{display:block}
+.tbl-col-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:calc(var(--radius) - 2px);
+  font-size:13px;cursor:pointer;color:hsl(var(--foreground));
+  user-select:none;transition:background 100ms;
+}
+.tbl-col-opt:hover{background:hsl(var(--accent))}
+.tbl-col-opt input[type="checkbox"]{width:15px;height:15px;accent-color:hsl(var(--primary));cursor:pointer;flex-shrink:0}
+/* Table footer */
+.tbl-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.tbl-row-count{font-size:13px;color:hsl(var(--muted-foreground))}
+.tbl-pag{display:flex;gap:8px}
+.tbl-pag-btn{
+  display:inline-flex;align-items:center;
+  height:36px;padding:0 16px;border-radius:var(--radius);
+  border:1px solid hsl(var(--border));
+  background:hsl(var(--background));color:hsl(var(--foreground));
+  font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;
+  transition:background 150ms;
+}
+.tbl-pag-btn:hover:not(:disabled){background:hsl(var(--accent))}
+.tbl-pag-btn:disabled{opacity:.4;pointer-events:none}
 
 /* Dialog (non-modal demo) */
 .dialog-demo{
@@ -1830,63 +1877,135 @@ body.nav-open .overlay{display:block;opacity:1}
 
     <!-- Live preview -->
     <div class="preview-pane">
-      <div class="preview-label">Data Table — sortable, with status badges</div>
-      <div class="preview-inner" style="padding:0;display:block">
+      <div class="preview-label">Table</div>
+      <div class="preview-inner" style="display:block">
+        <!-- Toolbar -->
+        <div class="tbl-toolbar">
+          <input type="text" class="tbl-filter" id="tbl-filter-input" placeholder="Filter email..." oninput="tblFilter(this.value)">
+          <div class="tbl-col-wrap">
+            <button class="tbl-col-btn" onclick="tblToggleColDd(event)">Column ▾</button>
+            <div class="tbl-col-dd" id="tbl-col-dd">
+              <label class="tbl-col-opt"><input type="checkbox" checked onchange="tblColToggle(4,this.checked)"> Status</label>
+              <label class="tbl-col-opt"><input type="checkbox" checked onchange="tblColToggle(2,this.checked)"> Email</label>
+              <label class="tbl-col-opt"><input type="checkbox" checked onchange="tblColToggle(5,this.checked)"> Amount</label>
+            </div>
+          </div>
+        </div>
+        <!-- Table -->
         <div class="tbl-wrap">
           <table class="tbl" id="demo-tbl">
             <thead>
               <tr>
-                <th style="width:36px"><input type="checkbox" class="tbl-check" id="chk-all" onchange="tblSelectAll(this)"></th>
-                <th class="sortable" onclick="tblSort(this,0)" data-col="0">Name <span class="sort-icon"></span></th>
-                <th class="sortable" onclick="tblSort(this,1)" data-col="1">Email <span class="sort-icon"></span></th>
-                <th class="sortable" onclick="tblSort(this,2)" data-col="2">Role <span class="sort-icon"></span></th>
-                <th class="sortable" onclick="tblSort(this,3)" data-col="3">Status <span class="sort-icon"></span></th>
-                <th style="text-align:right">Actions</th>
+                <th style="width:44px"><input type="checkbox" class="tbl-check" id="chk-all" onchange="tblSelectAll(this)"></th>
+                <th>Name</th>
+                <th data-col-idx="2">Email</th>
+                <th>Role</th>
+                <th data-col-idx="4">Status</th>
+                <th data-col-idx="5">Amount</th>
+                <th>Date</th>
               </tr>
             </thead>
             <tbody id="tbl-body">
               <tr>
-                <td><input type="checkbox" class="tbl-check tbl-row-chk"></td>
-                <td><div>Alice Johnson</div><div class="tbl-muted">Designer</div></td>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk" onchange="tblUpdateCount()"></td>
+                <td>Alice Johnson</td>
                 <td>alice@example.com</td>
                 <td>Admin</td>
                 <td><span class="badge badge-success">Active</span></td>
-                <td style="text-align:right"><button class="tbl-action-btn">Edit</button></td>
+                <td>$1,240</td>
+                <td>Jan 12, 2025</td>
               </tr>
               <tr>
-                <td><input type="checkbox" class="tbl-check tbl-row-chk"></td>
-                <td><div>Bob Martinez</div><div class="tbl-muted">Engineer</div></td>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk" onchange="tblUpdateCount()"></td>
+                <td>Bob Martinez</td>
                 <td>bob@example.com</td>
                 <td>Member</td>
                 <td><span class="badge badge-warning">Pending</span></td>
-                <td style="text-align:right"><button class="tbl-action-btn">Edit</button></td>
+                <td>$890</td>
+                <td>Feb 3, 2025</td>
               </tr>
               <tr>
-                <td><input type="checkbox" class="tbl-check tbl-row-chk"></td>
-                <td><div>Carol White</div><div class="tbl-muted">Product</div></td>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk" onchange="tblUpdateCount()"></td>
+                <td>Carol White</td>
                 <td>carol@example.com</td>
                 <td>Member</td>
                 <td><span class="badge badge-success">Active</span></td>
-                <td style="text-align:right"><button class="tbl-action-btn">Edit</button></td>
+                <td>$2,150</td>
+                <td>Nov 28, 2024</td>
               </tr>
               <tr>
-                <td><input type="checkbox" class="tbl-check tbl-row-chk"></td>
-                <td><div>David Kim</div><div class="tbl-muted">Marketing</div></td>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk" onchange="tblUpdateCount()"></td>
+                <td>David Kim</td>
                 <td>david@example.com</td>
                 <td>Viewer</td>
                 <td><span class="badge badge-outline">Inactive</span></td>
-                <td style="text-align:right"><button class="tbl-action-btn">Edit</button></td>
+                <td>$320</td>
+                <td>Oct 5, 2024</td>
               </tr>
               <tr>
-                <td><input type="checkbox" class="tbl-check tbl-row-chk"></td>
-                <td><div>Eva Chen</div><div class="tbl-muted">Engineering</div></td>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk" onchange="tblUpdateCount()"></td>
+                <td>Eva Chen</td>
                 <td>eva@example.com</td>
                 <td>Admin</td>
                 <td><span class="badge badge-destructive">Suspended</span></td>
-                <td style="text-align:right"><button class="tbl-action-btn">Edit</button></td>
+                <td>$3,400</td>
+                <td>Mar 17, 2025</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk" onchange="tblUpdateCount()"></td>
+                <td>Frank Rivera</td>
+                <td>frank@example.com</td>
+                <td>Member</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td>$560</td>
+                <td>Dec 9, 2024</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk" onchange="tblUpdateCount()"></td>
+                <td>Grace Lee</td>
+                <td>grace@example.com</td>
+                <td>Admin</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td>$1,780</td>
+                <td>Apr 1, 2025</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk" onchange="tblUpdateCount()"></td>
+                <td>Henry Park</td>
+                <td>henry@example.com</td>
+                <td>Viewer</td>
+                <td><span class="badge badge-warning">Pending</span></td>
+                <td>$230</td>
+                <td>Jan 30, 2025</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk" onchange="tblUpdateCount()"></td>
+                <td>Isabella Turner</td>
+                <td>isabella@example.com</td>
+                <td>Member</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td>$4,600</td>
+                <td>Feb 20, 2025</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check tbl-row-chk" onchange="tblUpdateCount()"></td>
+                <td>James Walker</td>
+                <td>james@example.com</td>
+                <td>Admin</td>
+                <td><span class="badge badge-outline">Inactive</span></td>
+                <td>$180</td>
+                <td>Sep 14, 2024</td>
               </tr>
             </tbody>
           </table>
+        </div>
+        <!-- Footer -->
+        <div class="tbl-footer">
+          <span class="tbl-row-count" id="tbl-sel-count">0 of 5 row(s) Selected</span>
+          <div class="tbl-pag">
+            <button class="tbl-pag-btn" id="tbl-prev" onclick="tblPage(-1)" disabled>Previous</button>
+            <button class="tbl-pag-btn" id="tbl-next" onclick="tblPage(1)">Next</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1894,33 +2013,45 @@ body.nav-open .overlay{display:block;opacity:1}
     <!-- Code -->
     <div class="code-pane">
       <div class="code-header"><span class="code-lang">HTML + CSS</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<pre><span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"tbl-wrap"</span><span class="tk">&gt;</span>
+<pre><span class="cm">/* Toolbar */</span>
+<span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"tbl-toolbar"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;input</span> <span class="ky">type</span>=<span class="st">"text"</span> <span class="ky">class</span>=<span class="st">"tbl-filter"</span> <span class="ky">placeholder</span>=<span class="st">"Filter email..."</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"tbl-col-btn"</span><span class="tk">&gt;</span>Column ▾<span class="tk">&lt;/button&gt;</span>
+<span class="tk">&lt;/div&gt;</span>
+
+<span class="cm">/* Table */</span>
+<span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"tbl-wrap"</span><span class="tk">&gt;</span>
   <span class="tk">&lt;table</span> <span class="ky">class</span>=<span class="st">"tbl"</span><span class="tk">&gt;</span>
     <span class="tk">&lt;thead&gt;</span>
       <span class="tk">&lt;tr&gt;</span>
         <span class="tk">&lt;th&gt;&lt;input</span> <span class="ky">type</span>=<span class="st">"checkbox"</span> <span class="ky">class</span>=<span class="st">"tbl-check"</span><span class="tk">&gt;&lt;/th&gt;</span>
-        <span class="tk">&lt;th</span> <span class="ky">class</span>=<span class="st">"sortable"</span><span class="tk">&gt;</span>Name <span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"sort-icon"</span><span class="tk">&gt;&lt;/span&gt;&lt;/th&gt;</span>
-        <span class="tk">&lt;th</span> <span class="ky">class</span>=<span class="st">"sortable"</span><span class="tk">&gt;</span>Status <span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"sort-icon"</span><span class="tk">&gt;&lt;/span&gt;&lt;/th&gt;</span>
-        <span class="tk">&lt;th&gt;</span>Actions<span class="tk">&lt;/th&gt;</span>
+        <span class="tk">&lt;th&gt;</span>Header<span class="tk">&lt;/th&gt;</span>
+        <span class="tk">&lt;th&gt;</span>Header<span class="tk">&lt;/th&gt;</span>
+        <span class="tk">&lt;th&gt;</span>Header<span class="tk">&lt;/th&gt;</span>
       <span class="tk">&lt;/tr&gt;</span>
     <span class="tk">&lt;/thead&gt;</span>
     <span class="tk">&lt;tbody&gt;</span>
       <span class="tk">&lt;tr&gt;</span>
-        <span class="tk">&lt;td&gt;&lt;input</span> <span class="ky">type</span>=<span class="st">"checkbox"</span> <span class="ky">class</span>=<span class="st">"tbl-check"</span><span class="tk">&gt;&lt;/td&gt;</span>
-        <span class="tk">&lt;td&gt;</span>
-          <span class="tk">&lt;div&gt;</span>Alice Johnson<span class="tk">&lt;/div&gt;</span>
-          <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"tbl-muted"</span><span class="tk">&gt;</span>Designer<span class="tk">&lt;/div&gt;</span>
-        <span class="tk">&lt;/td&gt;</span>
-        <span class="tk">&lt;td&gt;&lt;span</span> <span class="ky">class</span>=<span class="st">"badge badge-success"</span><span class="tk">&gt;</span>Active<span class="tk">&lt;/span&gt;&lt;/td&gt;</span>
-        <span class="tk">&lt;td&gt;&lt;button</span> <span class="ky">class</span>=<span class="st">"tbl-action-btn"</span><span class="tk">&gt;</span>Edit<span class="tk">&lt;/button&gt;&lt;/td&gt;</span>
+        <span class="tk">&lt;td&gt;&lt;input</span> <span class="ky">type</span>=<span class="st">"checkbox"</span> <span class="ky">class</span>=<span class="st">"tbl-check tbl-row-chk"</span><span class="tk">&gt;&lt;/td&gt;</span>
+        <span class="tk">&lt;td&gt;</span>Cell Value<span class="tk">&lt;/td&gt;</span>
+        <span class="tk">&lt;td&gt;</span>Cell Value<span class="tk">&lt;/td&gt;</span>
+        <span class="tk">&lt;td&gt;</span>Cell Value<span class="tk">&lt;/td&gt;</span>
       <span class="tk">&lt;/tr&gt;</span>
     <span class="tk">&lt;/tbody&gt;</span>
   <span class="tk">&lt;/table&gt;</span>
 <span class="tk">&lt;/div&gt;</span>
 
+<span class="cm">/* Footer */</span>
+<span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"tbl-footer"</span><span class="tk">&gt;</span>
+  <span class="tk">&lt;span</span> <span class="ky">class</span>=<span class="st">"tbl-row-count"</span><span class="tk">&gt;</span>0 of 5 row(s) Selected<span class="tk">&lt;/span&gt;</span>
+  <span class="tk">&lt;div</span> <span class="ky">class</span>=<span class="st">"tbl-pag"</span><span class="tk">&gt;</span>
+    <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"tbl-pag-btn"</span><span class="tk">&gt;</span>Previous<span class="tk">&lt;/button&gt;</span>
+    <span class="tk">&lt;button</span> <span class="ky">class</span>=<span class="st">"tbl-pag-btn"</span><span class="tk">&gt;</span>Next<span class="tk">&lt;/button&gt;</span>
+  <span class="tk">&lt;/div&gt;</span>
+<span class="tk">&lt;/div&gt;</span>
+
 <span class="cm">/* Key tokens */</span>
-<span class="cl">.tbl thead tr</span> { <span class="ky">background</span>: <span class="vl">hsl(var(--muted))</span>; }
-<span class="cl">.tbl th</span>       { <span class="ky">color</span>: <span class="vl">hsl(var(--muted-foreground))</span>; }
+<span class="cl">.tbl th</span>       { <span class="ky">font-size</span>: <span class="vl">14px</span>; <span class="ky">font-weight</span>: <span class="vl">500</span>; <span class="ky">color</span>: <span class="vl">hsl(var(--muted-foreground))</span>; }
 <span class="cl">.tbl tbody tr</span> { <span class="ky">background</span>: <span class="vl">hsl(var(--card))</span>; }
 <span class="cl">.tbl td</span>       { <span class="ky">color</span>: <span class="vl">hsl(var(--foreground))</span>; }
 <span class="cl">.tbl td</span>       { <span class="ky">border-bottom</span>: <span class="vl">1px solid hsl(var(--border))</span>; }</pre>
@@ -1930,16 +2061,17 @@ body.nav-open .overlay{display:block;opacity:1}
     <table class="prop-table">
       <thead><tr><th>Class</th><th>Element</th><th>Token Used</th><th>Description</th></tr></thead>
       <tbody>
+        <tr><td><code>.tbl-toolbar</code></td><td><code>&lt;div&gt;</code></td><td>—</td><td>Flex row holding the filter input and column button</td></tr>
+        <tr><td><code>.tbl-filter</code></td><td><code>&lt;input&gt;</code></td><td><code>--border</code>, <code>--background</code></td><td>Text input to filter rows</td></tr>
+        <tr><td><code>.tbl-col-btn</code></td><td><code>&lt;button&gt;</code></td><td><code>--border</code>, <code>--accent</code></td><td>Column visibility toggle button</td></tr>
         <tr><td><code>.tbl-wrap</code></td><td><code>&lt;div&gt;</code></td><td><code>--border</code></td><td>Scrollable container with rounded border</td></tr>
-        <tr><td><code>.tbl</code></td><td><code>&lt;table&gt;</code></td><td>—</td><td>Base table, <code>border-collapse: collapse</code>, 13px font</td></tr>
-        <tr><td><code>.tbl thead tr</code></td><td>—</td><td><code>--muted</code></td><td>Header row background</td></tr>
-        <tr><td><code>.tbl th</code></td><td>—</td><td><code>--muted-foreground</code></td><td>Uppercase 11px header labels</td></tr>
-        <tr><td><code>.tbl th.sortable</code></td><td>—</td><td><code>--foreground</code> on hover</td><td>Clickable header with sort indicator</td></tr>
-        <tr><td><code>.tbl tbody tr</code></td><td>—</td><td><code>--card</code></td><td>Row background</td></tr>
-        <tr><td><code>.tbl tbody tr:hover</code></td><td>—</td><td><code>--muted</code></td><td>Row hover highlight</td></tr>
-        <tr><td><code>.tbl-muted</code></td><td><code>&lt;div&gt;</code></td><td><code>--muted-foreground</code></td><td>Secondary text below main cell value</td></tr>
+        <tr><td><code>.tbl</code></td><td><code>&lt;table&gt;</code></td><td>—</td><td>Base table, <code>border-collapse: collapse</code>, 14px font</td></tr>
+        <tr><td><code>.tbl th</code></td><td>—</td><td><code>--muted-foreground</code></td><td>Medium-weight 14px header labels, 44px height</td></tr>
+        <tr><td><code>.tbl tbody tr</code></td><td>—</td><td><code>--card</code></td><td>Row background, 48px height</td></tr>
         <tr><td><code>.tbl-check</code></td><td><code>&lt;input&gt;</code></td><td><code>--primary</code></td><td>Checkbox, accent-color tied to primary token</td></tr>
-        <tr><td><code>.tbl-action-btn</code></td><td><code>&lt;button&gt;</code></td><td><code>--border</code>, <code>--accent</code></td><td>Inline row action button</td></tr>
+        <tr><td><code>.tbl-footer</code></td><td><code>&lt;div&gt;</code></td><td>—</td><td>Footer row with selection count and pagination</td></tr>
+        <tr><td><code>.tbl-row-count</code></td><td><code>&lt;span&gt;</code></td><td><code>--muted-foreground</code></td><td>"X of Y row(s) Selected" label</td></tr>
+        <tr><td><code>.tbl-pag-btn</code></td><td><code>&lt;button&gt;</code></td><td><code>--border</code>, <code>--accent</code></td><td>Previous / Next pagination buttons</td></tr>
       </tbody>
     </table>
 
@@ -2073,24 +2205,91 @@ function copyCode(btn) {
   render();
 })();
 
-// ── Table sort ────────────────────────────────────────────────
-function tblSort(th, col) {
-  const tbl = th.closest('table');
-  const tbody = tbl.querySelector('tbody');
-  const ths = tbl.querySelectorAll('th.sortable');
-  const asc = th.classList.contains('sort-asc');
-  ths.forEach(h => { h.classList.remove('sort-asc','sort-desc'); });
-  th.classList.add(asc ? 'sort-desc' : 'sort-asc');
-  const rows = Array.from(tbody.querySelectorAll('tr'));
-  rows.sort((a,b)=>{
-    const ca=a.cells[col+1]?.innerText.trim().toLowerCase()||'';
-    const cb=b.cells[col+1]?.innerText.trim().toLowerCase()||'';
-    return asc ? cb.localeCompare(ca) : ca.localeCompare(cb);
-  });
-  rows.forEach(r=>tbody.appendChild(r));
+// ── Table ─────────────────────────────────────────────────────
+var _tblAllRows=[], _tblPage=1, _tblPageSize=5, _tblFilterVal='';
+
+function tblInit(){
+  _tblAllRows = Array.from(document.querySelectorAll('#tbl-body tr'));
+  tblRender();
 }
+
+function tblRender(){
+  const q = _tblFilterVal.toLowerCase();
+  const filtered = q
+    ? _tblAllRows.filter(r => {
+        // filter by email (col index 2)
+        const emailCell = r.cells[2];
+        return emailCell && emailCell.textContent.toLowerCase().includes(q);
+      })
+    : _tblAllRows;
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total / _tblPageSize));
+  _tblPage = Math.min(_tblPage, pages);
+  const start = (_tblPage - 1) * _tblPageSize;
+  const end = start + _tblPageSize;
+  // Hide all, then show current page slice
+  _tblAllRows.forEach(r => r.style.display = 'none');
+  filtered.slice(start, end).forEach(r => r.style.display = '');
+  // Update buttons
+  const prev = document.getElementById('tbl-prev');
+  const next = document.getElementById('tbl-next');
+  if(prev) prev.disabled = _tblPage <= 1;
+  if(next) next.disabled = _tblPage >= pages;
+  tblUpdateCount();
+}
+
+function tblPage(dir){
+  _tblPage += dir;
+  tblRender();
+}
+
+function tblFilter(val){
+  _tblFilterVal = val;
+  _tblPage = 1;
+  tblRender();
+}
+
 function tblSelectAll(chk){
-  document.querySelectorAll('.tbl-row-chk').forEach(c=>c.checked=chk.checked);
+  _tblAllRows.filter(r => r.style.display !== 'none').forEach(r => {
+    const c = r.querySelector('.tbl-row-chk');
+    if(c) c.checked = chk.checked;
+  });
+  tblUpdateCount();
+}
+
+function tblUpdateCount(){
+  const visible = _tblAllRows.filter(r => r.style.display !== 'none');
+  const sel = _tblAllRows.filter(r => r.querySelector('.tbl-row-chk:checked')).length;
+  const total = _tblAllRows.length;
+  const el = document.getElementById('tbl-sel-count');
+  if(el) el.textContent = sel + ' of ' + total + ' row(s) Selected';
+  const allChk = document.getElementById('chk-all');
+  if(allChk) allChk.checked = sel === visible.length && visible.length > 0;
+}
+
+function tblToggleColDd(e){
+  e.stopPropagation();
+  document.getElementById('tbl-col-dd').classList.toggle('open');
+}
+
+function tblColToggle(colIdx, show){
+  const tbl = document.getElementById('demo-tbl');
+  tbl.querySelectorAll('tr').forEach(tr => {
+    if(tr.cells[colIdx]) tr.cells[colIdx].style.display = show ? '' : 'none';
+  });
+}
+
+// Close column dropdown on outside click
+document.addEventListener('click', function(e){
+  const dd = document.getElementById('tbl-col-dd');
+  if(dd && !e.target.closest('.tbl-col-wrap')) dd.classList.remove('open');
+});
+
+// Init table — works whether script runs before or after DOMContentLoaded
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', tblInit);
+} else {
+  tblInit();
 }
 
 // ── Tab switcher ──────────────────────────────────────────────
